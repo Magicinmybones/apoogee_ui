@@ -376,7 +376,8 @@ img {
    rest they soften text and image rasterisation. */
 .is-moving .scene__camera,
 .is-moving .scene__photo,
-.is-moving .platform__content {
+.is-moving .shot,
+.is-moving .platform__title {
   will-change: transform;
 }
 
@@ -417,6 +418,9 @@ img {
   gap: calc(30 * var(--u-hero));
   width: calc(763 * var(--u-hero));
   max-width: 100%;
+  /* On the way out it fades and drifts up about 10px — measured off the
+     reference, where the block's bounding box climbs 8-10px as it goes. */
+  transform: translateY(calc(var(--hero-out, 0) * -10 * var(--u-hero)));
   opacity: var(--hero-o, 1);
   visibility: var(--hero-vis, visible);
 }
@@ -500,12 +504,7 @@ img {
   left: 50%;
   top: 20.813%; /* 215 / 1033 */
   width: calc(901 * var(--u-shot));
-  /* The frame arrives as one piece: the whole group rises 555 design px —
-     the travel measured off the reference animation, which moves the pill,
-     the heading and the product window together. */
-  transform:
-    translateX(-50%)
-    translateY(calc((1 - var(--plat-p, 1)) * 555 * var(--u-shot)));
+  transform: translateX(-50%);
   opacity: var(--plat-o, 1);
   display: flex;
   flex-direction: column;
@@ -515,9 +514,15 @@ img {
 
 /* The design seats the pill and the heading 8.25px left of the group's axis,
    which the product window is centred on. */
+/* The pill and the heading arrive as one block — they hold a constant 78px
+   gap through the whole move in the reference — and they travel 638px, further
+   and on a sharper curve than the product window's 555px. That difference is
+   the parallax that gives the arrival its depth. */
 .pill,
 .platform__title {
-  transform: translateX(calc(-8.25 * var(--u-shot)));
+  transform:
+    translateX(calc(-8.25 * var(--u-shot)))
+    translateY(calc((1 - var(--plat-text-p, 1)) * 638 * var(--u-shot)));
 }
 
 /* "Live Data Stream" pill --------------------------------------------------- */
@@ -570,6 +575,8 @@ img {
   height: calc(680 * var(--u-shot));
   margin-top: calc(50 * var(--u-shot));
   flex: none;
+  /* Rises 555 design px, from the foot of the frame. */
+  transform: translateY(calc((1 - var(--plat-shot-p, 1)) * 555 * var(--u-shot)));
 }
 
 .shot__window {
@@ -1079,42 +1086,53 @@ img {
    The intro animates the elements *inside* .hero__content while scroll drives
    the container, so the two never fight over the same property.
    ========================================================================== */
+/* Each headline line is uncovered rather than moved: in the reference its ink
+   grows upward from a pinned bottom edge, which is a line sliding up inside a
+   clip. clip-path is used instead of overflow so the box keeps its exact
+   layout — it is left open at the top for ascenders and closed just below the
+   baseline, where the reference's mask sits. */
+.hero__title .line {
+  display: block;
+  clip-path: inset(-0.35em -0.6em -0.05em -0.6em);
+}
+
+.hero__title .line__in {
+  display: block;
+}
+
 .js .site-header,
-.js .hero__title .line,
 .js .hero__badge,
 .js .hero__subtitle {
   opacity: 0;
 }
 
-.js .hero__title .line {
-  transform: translateY(0.4em);
-}
-
-.js .hero__badge,
-.js .hero__subtitle {
-  transform: translateY(16px);
+.js .hero__title .line__in {
+  transform: translateY(100%);
+  opacity: 0;
 }
 
 .is-ready .site-header {
   animation: fade-in 0.35s linear forwards;
 }
 
-.is-ready .hero__title .line {
-  animation: rise-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.is-ready .hero__title .line__in {
+  animation: line-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.is-ready .hero__title .line:nth-child(1) { animation-delay: 0.07s; }
-.is-ready .hero__title .line:nth-child(2) { animation-delay: 0.22s; }
-.is-ready .hero__title .line:nth-child(3) { animation-delay: 0.37s; }
+.is-ready .hero__title .line:nth-child(1) .line__in { animation-delay: 0.08s; }
+.is-ready .hero__title .line:nth-child(2) .line__in { animation-delay: 0.21s; }
+.is-ready .hero__title .line:nth-child(3) .line__in { animation-delay: 0.34s; }
 
+/* The badge and the sub-copy do not move at all in the reference — their
+   bounding boxes are fixed from the first frame they appear. They only fade. */
 .is-ready .hero__badge,
 .is-ready .hero__subtitle {
-  animation: rise-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+  animation: fade-in 0.35s linear 0.95s forwards;
 }
 
 /* Loading with the page already scrolled, or with reduced motion, skips it. */
 .is-instant .site-header,
-.is-instant .hero__title .line,
+.is-instant .hero__title .line__in,
 .is-instant .hero__badge,
 .is-instant .hero__subtitle {
   opacity: 1;
@@ -1126,12 +1144,10 @@ img {
   to { opacity: 1; }
 }
 
-@keyframes rise-in {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.hero__title .line {
-  display: block;
+@keyframes line-reveal {
+  0%   { transform: translateY(100%); opacity: 0; }
+  25%  { opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 /* ==========================================================================

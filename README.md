@@ -140,28 +140,51 @@ photograph's offset and scale were solved per frame against the source image,
 and each element's opacity and position were measured — then normalised onto
 the scroll timeline:
 
-| Track | Window | Notes |
+| Track | Window | Behaviour |
 | --- | --- | --- |
-| camera pan | 0 → 0.86, linear | measured 0.447 of the way at 0.377 of the timeline, against 0.444 for a straight line; it lands the framing before the content finishes settling, then holds |
+| camera pan | 0 → 0.86, linear | measured 0.447 of the way at 0.377 of the timeline, against 0.444 for a straight line; it lands the framing before the content settles, then holds |
 | camera push-in | peaks mid-travel | the reference is at 1.108x at that same point |
-| glow out | 0 → 0.36 | only the hero frame carries the warm wash |
-| hero copy out | 0.29 → 0.41 | it holds at full strength while the camera climbs, then goes quickly |
-| platform frame up | 0.557 → 0.984, ease-out cubic | pill, heading and product window rise 555px together as one piece |
-| platform frame in | 0.567 → 0.623 | fades up during the first part of that rise |
+| hero copy out | 0.295 → 0.365 | holds at full strength while the camera climbs, then goes in about a fifth of a second — with a ~10px upward drift, which its bounding box shows |
+| glow out | 0.55 → 0.95 | see the note below |
+| platform frame in | 0.557 → 0.623 | fades up early in its rise |
+| pill + heading up | 0.563 → 0.967, ease-out quart | **638px** — they hold a constant 78px gap through the whole move, so they are one block |
+| product window up | 0.557 → 0.984, ease-out cubic | **555px** |
 
-The opening is a separate, load-time timeline in CSS, also measured from the
-reference: the header settles first, the three headline lines rise 0.4em on a
-0.15s stagger, then the badge and sub-copy. It animates the elements *inside*
-`.hero__content` while scroll drives the container, so the two never contend
-for the same property. It is skipped if the page loads part-scrolled.
+The two travel distances are not a rounding difference: tracking the heading's
+ink and the window's top edge frame by frame gives 638px against 555px on
+different curves. That parallax is what gives the arrival its depth, and
+moving them as one block — which is what an earlier pass did — flattens it.
 
-**One deliberate difference from the reference.** Its camera keeps zooming past
-the platform frame, resting at about 1.65x with a much larger sun than
-`Untitled_12.fig` shows. Ending there would mean section two no longer matches
-its own design, so the travel resolves onto the Figma frame instead and the
-push-in returns to 1. Everything up to that point follows the reference. If the
-video's ending is what you want, raising `CAM.push` and dropping the resolve is
-a small change in `js/script.js`.
+The opening is a separate, load-time timeline in CSS, also measured element by
+element:
+
+| Element | Behaviour |
+| --- | --- |
+| header | fades in over 0.35s, no movement |
+| headline lines | **uncovered, not moved**: each line slides up 100% inside a clip, 0.9s, 0.13s apart. In the reference each line's ink grows upward from a pinned bottom edge — line 1 holds at y 718 while its top climbs 700 → 642 — which is a mask, not a translate |
+| badge, sub-copy | fade only. Their bounding boxes are fixed from the first frame they appear (the sub-copy sits at 922-958 throughout), so nothing moves |
+
+The clip uses `clip-path` rather than `overflow`, so the line boxes keep their
+exact layout; it is left open at the top for ascenders and closed just below
+the baseline, where the reference's mask sits. The opening animates the
+elements *inside* `.hero__content` while scroll drives the container, so the
+two never contend for the same property. It is skipped if the page loads
+part-scrolled.
+
+**Two deliberate differences from the reference**, both for the same reason —
+the reference does not end on the platform frame's own design, and section two
+has to.
+
+* Its camera keeps zooming past that frame, resting at about 1.65x with a much
+  larger sun than `Untitled_12.fig` shows. The travel resolves onto the Figma
+  frame instead and the push-in returns to 1.
+* Its warm wash never fades — measured at the bottom corners it holds the same
+  saturation from the hero right through to the last frame — but the platform
+  frame has the wash hidden. It is carried through the move and resolved late
+  (0.55 → 0.95) rather than dropped early.
+
+Everything up to those resolutions follows the reference. If the video's ending
+is what you want instead, both are small changes in `js/script.js`.
 
 ## Layout architecture
 

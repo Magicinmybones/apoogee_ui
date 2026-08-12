@@ -22,6 +22,7 @@
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function linear(t) { return t; }
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
   function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
@@ -58,11 +59,22 @@
   /* ------------------------------------------------------------------
      Timeline. Windows are fractions of the scene's scroll travel.
      ------------------------------------------------------------------ */
+  /* Windows are fractions of the scene's travel, taken from the reference
+     animation's 2.05s -> 5.10s transition and normalised onto it. */
   var T = {
-    glowOut:  [0.000, 0.360, easeInOutCubic],
-    heroOut:  [0.290, 0.410, easeInOutCubic],
-    platIn:   [0.567, 0.623, easeOutCubic],   /* the frame fades up ...        */
-    platRise: [0.557, 0.984, easeOutCubic]    /* ... while it rides into place */
+    /* The hero copy holds at full strength while the camera climbs, then goes
+       in about a fifth of a second — much faster than the move around it. */
+    heroOut:   [0.295, 0.365, easeInOutCubic],
+    /* The reference keeps the warm wash the whole way; it is resolved late so
+       the frame still lands on its design, which has no wash. */
+    glowOut:   [0.550, 0.950, easeInOutCubic],
+    /* The platform frame fades up early in its rise. */
+    platIn:    [0.557, 0.623, easeOutCubic],
+    /* Pill and heading move as one block - they hold a constant 78px gap - and
+       travel 638px, further and on a sharper curve than the window's 555px.
+       The two rates are the parallax the arrival gets its depth from. */
+    platText:  [0.563, 0.967, easeOutQuart],
+    platShot:  [0.557, 0.984, easeOutCubic]
   };
 
   var scene = document.getElementById('scene');
@@ -81,13 +93,16 @@
     root.style.setProperty('--glow-o', (1 - track(p, T.glowOut[0], T.glowOut[1], T.glowOut[2])).toFixed(3));
 
     var heroOut = track(p, T.heroOut[0], T.heroOut[1], T.heroOut[2]);
+    root.style.setProperty('--hero-out', heroOut.toFixed(3));
     root.style.setProperty('--hero-o', (1 - heroOut).toFixed(3));
     root.style.setProperty('--hero-vis', heroOut >= 1 ? 'hidden' : 'visible');
 
     root.style.setProperty('--plat-o',
       track(p, T.platIn[0], T.platIn[1], T.platIn[2]).toFixed(3));
-    root.style.setProperty('--plat-p',
-      track(p, T.platRise[0], T.platRise[1], T.platRise[2]).toFixed(4));
+    root.style.setProperty('--plat-text-p',
+      track(p, T.platText[0], T.platText[1], T.platText[2]).toFixed(4));
+    root.style.setProperty('--plat-shot-p',
+      track(p, T.platShot[0], T.platShot[1], T.platShot[2]).toFixed(4));
 
     /* Keep the frame that is off-stage out of the accessibility tree and
        out of hit-testing. */
