@@ -76,23 +76,52 @@ generic icon set.
 
 All three are self-hosted in `assets/fonts/` as WOFF2.
 
-## Responsive behaviour
+## Layout architecture
 
-The file only ships a desktop frame, so:
+The page is a normal stack of sections, not a scaled artboard. The hero is a
+`min-height: 100svh` section, so it always occupies exactly one viewport with
+nothing below the fold, and further sections append after it in document flow.
+The header is absolutely positioned over the hero and is ready to be made
+sticky once there is a scrolled state to design against.
 
-* **≥ 1644px** — the artboard renders at native size, centred.
-* **900 – 1644px** — the whole artboard is scaled proportionally (`transform:
-  scale()`, driven by a few lines in `js/script.js`), so every proportion,
-  spacing value and line break stays exactly as designed.
-* **< 900px** — the same components reflow into a single column. Colours,
-  type, radii, the gradient and the photograph's framing are unchanged; the
-  nav and action pills collapse into a toggle menu built from the design's own
-  surfaces. Nothing is redesigned or added beyond that control.
+Everything is driven by two fluid units declared in `:root`. Both equal exactly
+`1px` at the design's 1644px reference width — so at that width the page
+reproduces the Figma frame — and scale with the viewport either side of it:
+
+| Unit | Drives | Range |
+| --- | --- | --- |
+| `--u-ui` | header, nav, buttons, badge | clamped 0.93 → 1.15, so 14px labels stay legible on a 1280 laptop and don't balloon on a 2560 display |
+| `--u-hero` | headline, sub-copy, measure, gaps | clamped 0.74 → 1.30, tracking the viewport almost exactly so the poster keeps the design's proportions |
+
+Every dimension is then written as the design's own number, e.g.
+`font-size: calc(90 * var(--u-hero))` — the Figma values stay readable in the
+source. Tracking and the headline's optical offset are expressed in `em`, so
+they scale with the type automatically.
+
+The photograph is sized `max(108.699%, 172.95svh)` — the two ways the design
+expresses the same crop, relative to the frame's width and to its height.
+Taking the larger keeps the design's framing on wide displays and zooms in,
+rather than revealing more of the image, on squarer ones. The glow's radii are
+percentages of the hero box, so the wash follows the viewport.
+
+The source frame is a rounded presentation artboard. The hero renders
+full-bleed because it is now a page section rather than a shot; setting
+`--hero-inset: 12px` and `--hero-radius: 42px` in `:root` restores the inset,
+rounded card.
+
+Tablet and phone layouts are not designed yet — below 900px the page falls back
+to a single-column reflow with a toggle menu so it stays usable.
 
 ## Verification
 
 The implementation was rendered in Chromium and compared numerically against
-the design's own 1644 × 1033 render. Element geometry (header, nav, buttons,
-hero stack, badge, headline, sub-copy) matches the Figma coordinates exactly,
-and the mean per-pixel difference over the whole frame is ~1%, accounted for by
-text antialiasing and image resampling.
+the design's own 1644 × 1033 render. At that reference size every element
+(header, nav, buttons, hero stack, badge, headline, sub-copy) lands within a
+pixel of its Figma coordinates, and the mean per-pixel difference over the
+whole frame is ~1%, accounted for by text antialiasing and image resampling.
+
+It was then checked at 2560×1440, 1920×1080, 1728×1117, 1680×1050, 1600×900,
+1512×982, 1440×900, 1366×768, 1280×1024, 1280×800, 1280×720, 1152×720 and
+1024×768. At every one the hero occupies exactly one viewport — no vertical or
+horizontal scrollbar, no overlap between the header and the hero copy — the
+photograph covers the frame on all four edges, and the console is clean.

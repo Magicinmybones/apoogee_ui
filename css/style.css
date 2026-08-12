@@ -1,7 +1,21 @@
 /* ==========================================================================
-   Apogee — hero landing page
-   Implemented 1:1 from the source Figma frame (1644 x 1033).
-   Every numeric value below is taken directly from the design file.
+   Apogee
+   --------------------------------------------------------------------------
+   Built from the source Figma frame, which is 1644 x 1033. Rather than
+   scaling that artboard as one rigid block, the composition is rebuilt from
+   fluid units so the hero always fills exactly one viewport and further
+   sections can stack underneath it.
+
+   Two fluid units carry the whole layout. Both equal 1px at the design's
+   1644px reference width, so at that width the page reproduces the Figma
+   frame exactly; away from it they scale, with sensible floors and ceilings.
+
+     --u-ui    chrome (header, buttons, badge). Clamped tightly so small text
+               stays legible on a 1280 laptop and does not balloon on a 2560
+               display.
+     --u-hero  the hero composition (headline, sub-copy, measure). Tracks the
+               viewport almost exactly, so the poster keeps the proportions of
+               the design across the whole desktop range.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -40,11 +54,20 @@
    Design tokens
    -------------------------------------------------------------------------- */
 :root {
-  /* Artboard */
-  --stage-width: 1644px;
-  --stage-height: 1033px;
-  --stage-radius: 42px;
-  --stage-scale: 1;
+  /* Fluid units — 100vw / 1644 is exactly 1px at the reference width. */
+  --u-ui: clamp(0.93px, calc(100vw / 1644), 1.15px);
+  --u-hero: clamp(0.74px, calc(100vw / 1644), 1.3px);
+
+  /* Page gutters. 35px / 38px at the reference width, matching the design's
+     header inset (the 3px difference is the design's own asymmetry). */
+  --gutter-start: clamp(24px, 2.129vw, 56px);
+  --gutter-end: clamp(26px, 2.311vw, 60px);
+
+  /* The source frame is a rounded presentation artboard. Set these to 12px
+     and 42px to render the hero as that inset, rounded card instead of
+     full-bleed. */
+  --hero-inset: 0px;
+  --hero-radius: 0px;
 
   /* Colour */
   --color-void: #080A19;          /* artboard base fill                     */
@@ -56,7 +79,8 @@
   --color-badge-surface: rgba(0, 0, 0, 0.3);
   --color-text-muted: rgba(255, 255, 255, 0.8);
 
-  /* The warm radial wash laid over the photograph */
+  /* The warm radial wash laid over the photograph. Radii are percentages of
+     the hero box, so the shape follows the viewport. */
   --glow: radial-gradient(
     109.987% 112.486% at 50% 0%,
     rgba(247, 127, 113, 0) 66.43%,
@@ -68,11 +92,6 @@
   --font-display: 'STIX Two Math', 'STIX Two Text', 'Times New Roman', serif;
   --font-ui: 'Switzer', 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --font-label: 'General Sans', 'Switzer', 'Inter', Arial, sans-serif;
-
-  /* Radii */
-  --radius-nav: 11px;
-  --radius-actions: 13px;
-  --radius-badge: 5px;
 }
 
 /* --------------------------------------------------------------------------
@@ -86,12 +105,11 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  min-height: 100svh;
-  display: flex;
   background: var(--color-void);
   color: var(--color-white);
   font-family: var(--font-ui);
@@ -115,115 +133,84 @@ img {
   border-radius: 4px;
 }
 
-/* --------------------------------------------------------------------------
-   Stage
-   The artboard is reproduced at its native 1644 x 1033 and uniformly scaled
-   down to fit narrower viewports, so proportions stay exact.
-   -------------------------------------------------------------------------- */
-.stage-frame {
-  width: calc(var(--stage-width) * var(--stage-scale));
-  height: calc(var(--stage-height) * var(--stage-scale));
-  margin: auto; /* centres the artboard on viewports larger than the design */
-}
-
-.stage {
-  position: relative;
-  width: var(--stage-width);
-  height: var(--stage-height);
-  border-radius: var(--stage-radius);
-  background: var(--color-void);
-  overflow: hidden;
-  transform: scale(var(--stage-scale));
-  transform-origin: top left;
-}
-
-/* Background photograph — placed with the exact offset and size of the
-   image layer inside the Figma mask group. */
-.stage__photo {
-  position: absolute;
-  left: -35px;
-  top: -2037px;
-  width: 1787px;
-  height: 3188px;
-  max-width: none;
-  user-select: none;
-  pointer-events: none;
-}
-
-.stage__glow {
-  position: absolute;
-  inset: 0;
-  background: var(--glow);
-  pointer-events: none;
-}
-
-/* --------------------------------------------------------------------------
+/* ==========================================================================
    Header
-   -------------------------------------------------------------------------- */
+   Overlays the hero, and is ready to be made sticky once there is a scrolled
+   state to design against.
+   ========================================================================== */
 .site-header {
   position: absolute;
-  left: 35px;
-  top: 29px;
-  width: 1571px;
-  height: 52px;
+  z-index: 10;
+  top: calc(var(--hero-inset) + 29 * var(--u-ui));
+  left: var(--hero-inset);
+  right: var(--hero-inset);
+}
+
+.site-header__inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(24 * var(--u-ui));
+  padding-left: var(--gutter-start);
+  padding-right: var(--gutter-end);
 }
 
 /* Brand ------------------------------------------------------------------- */
 .brand {
-  position: absolute;
-  left: 0;
-  top: 9px;
-  width: 131px;
-  height: 38px;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(11.57 * var(--u-ui));
+  flex: none;
+  /* The design seats the wordmark 2px below the header's centre line. */
+  margin-top: calc(4 * var(--u-ui));
 }
 
 .brand__mark {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 32.4336px;
-  height: 38.001px;
+  height: calc(38 * var(--u-ui));
+  width: auto;
 }
 
 .brand__name {
-  position: absolute;
-  left: 44px;
-  top: 5px;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 30px;
+  font-size: calc(30 * var(--u-ui));
   line-height: 0.95;
-  letter-spacing: -1.8px; /* -6% */
+  letter-spacing: -0.06em;
   color: var(--color-white);
   white-space: nowrap;
 }
 
 /* Primary navigation ------------------------------------------------------ */
 .nav {
+  /* Centred on the viewport rather than between its neighbours, which is how
+     the design places it. */
   position: absolute;
-  left: 616.5px;
-  top: 0;
-  width: 343px;
-  height: 52px;
-  padding: 0 24px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: calc(52 * var(--u-ui));
+  /* Fixed width in the design, with the items centred inside it. Kept as a
+     minimum so the pill still grows if the labels ever do. */
+  min-width: calc(343 * var(--u-ui));
+  padding: 0 calc(24 * var(--u-ui));
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 30px;
-  border-radius: var(--radius-nav);
+  gap: calc(30 * var(--u-ui));
+  border-radius: calc(11 * var(--u-ui));
   background: var(--color-nav-surface);
 }
 
 .nav__link {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: calc(5 * var(--u-ui));
   font-family: var(--font-ui);
   font-weight: 450;
-  font-size: 14px;
+  font-size: calc(14 * var(--u-ui));
   line-height: 1;
-  letter-spacing: -0.28px; /* -2% */
+  letter-spacing: -0.02em;
   color: var(--color-text-muted);
   white-space: nowrap;
   transition: color 0.18s ease;
@@ -235,21 +222,20 @@ img {
 
 .nav__chevron {
   flex: none;
+  width: calc(7 * var(--u-ui));
+  height: calc(4 * var(--u-ui));
   overflow: visible;
 }
 
 /* Header buttons ---------------------------------------------------------- */
 .header-actions {
-  position: absolute;
-  left: 1345px;
-  top: 0;
-  width: 226px;
-  height: 52px;
-  padding: 3px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  border-radius: var(--radius-actions);
+  flex: none;
+  height: calc(52 * var(--u-ui));
+  padding: calc(3 * var(--u-ui));
+  gap: calc(5 * var(--u-ui));
+  border-radius: calc(13 * var(--u-ui));
   background: var(--color-actions-surface);
 }
 
@@ -257,22 +243,22 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 46px;
-  padding: 0 24px;
+  height: calc(46 * var(--u-ui));
+  padding: 0 calc(24 * var(--u-ui));
   border: 0;
-  border-radius: var(--radius-nav);
+  border-radius: calc(11 * var(--u-ui));
   font-family: var(--font-ui);
   font-weight: 450;
-  font-size: 14px;
+  font-size: calc(14 * var(--u-ui));
   line-height: 1;
-  letter-spacing: -0.28px; /* -2% */
+  letter-spacing: -0.02em;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 .button--ghost {
-  width: 84px;
+  min-width: calc(84 * var(--u-ui)); /* button widths from the design */
   background: transparent;
   color: var(--color-white);
 }
@@ -282,7 +268,7 @@ img {
 }
 
 .button--solid {
-  width: 131px;
+  min-width: calc(131 * var(--u-ui));
   background: var(--color-button-solid);
   color: var(--color-ink);
 }
@@ -291,17 +277,15 @@ img {
   background: var(--color-white);
 }
 
-/* Mobile menu trigger — hidden at the design's own viewport size ----------- */
+/* Menu trigger — only used once the layout reflows ------------------------- */
 .menu-toggle {
   display: none;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 52px;
-  height: 52px;
+  width: calc(52 * var(--u-ui));
+  height: calc(52 * var(--u-ui));
+  flex: none;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-actions);
+  border-radius: calc(13 * var(--u-ui));
   background: var(--color-actions-surface);
   cursor: pointer;
   flex-direction: column;
@@ -330,20 +314,64 @@ img {
   display: none;
 }
 
-/* --------------------------------------------------------------------------
-   Hero
-   Vertical stack, centred, 30px between blocks — mirrors the auto-layout of
-   the "Frame 2147237597" group.
-   -------------------------------------------------------------------------- */
+/* ==========================================================================
+   Hero — one full viewport
+   ========================================================================== */
 .hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: calc(100svh - 2 * var(--hero-inset));
+  margin: var(--hero-inset);
+  border-radius: var(--hero-radius);
+  overflow: hidden;
+  background: var(--color-void);
+
+  /* The sub-copy sits 70.28px above the foot of the 1033px frame. */
+  padding-bottom: clamp(40px, 6.803svh, 96px);
+  padding-inline: var(--gutter-start);
+}
+
+.hero__backdrop {
   position: absolute;
-  left: 441px;
-  top: 556px;
-  width: 763px;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* The photograph keeps the design's framing. The artboard shows it at
+   1787/1644 of the frame's width, which is also 1787/1033 = 172.95% of the
+   frame's height; taking whichever is larger means the crop stays the design's
+   on wide displays and simply zooms in — rather than revealing more of the
+   image — on squarer ones. It is anchored so the point 80.1% down the image
+   sits on the hero's centre line, exactly as the artboard is centred. */
+.hero__photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(108.699%, 172.95svh);
+  height: auto;
+  max-width: none;
+  transform: translate(-47.957%, -80.097%);
+  user-select: none;
+}
+
+.hero__glow {
+  position: absolute;
+  inset: 0;
+  background: var(--glow);
+}
+
+.hero__content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
+  gap: calc(30 * var(--u-hero));
+  width: calc(763 * var(--u-hero));
+  max-width: 100%;
 }
 
 /* "Backed by: Y Combinator" pill ------------------------------------------ */
@@ -351,114 +379,83 @@ img {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 9.86px 14.0305px;
-  border-radius: var(--radius-badge);
+  padding: calc(9.86 * var(--u-ui)) calc(14.0305 * var(--u-ui));
+  border-radius: calc(5 * var(--u-ui));
   background: var(--color-badge-surface);
-  -webkit-backdrop-filter: blur(14.6px);
-  backdrop-filter: blur(14.6px);
+  -webkit-backdrop-filter: blur(calc(14.6 * var(--u-ui)));
+  backdrop-filter: blur(calc(14.6 * var(--u-ui)));
 }
 
 .hero__badge-row {
   display: flex;
   align-items: center;
-  min-height: 24px; /* height of the row in the design */
-  gap: 8.1845px;
+  min-height: calc(24 * var(--u-ui));
+  gap: calc(8.1845 * var(--u-ui));
 }
 
 .hero__badge-label {
   /* Width of the label in the design; pinned so the pill and the logo keep
-     their exact positions regardless of the substituted label typeface. */
-  width: 69px;
+     their proportions regardless of the substituted label typeface. */
+  width: calc(69 * var(--u-ui));
   font-family: var(--font-label);
   font-weight: 400;
-  font-size: 14.0305px;
-  line-height: 23.3842px;
-  letter-spacing: -0.1403px; /* -1% */
+  font-size: calc(14.0305 * var(--u-ui));
+  line-height: calc(23.3842 * var(--u-ui));
+  letter-spacing: -0.01em;
   color: var(--color-white);
   white-space: nowrap;
 }
 
 .hero__badge-logo {
   flex: none;
-  width: 93.3907px;
-  height: 18.7367px;
+  width: calc(93.3907 * var(--u-ui));
+  height: auto;
 }
 
 /* Headline ---------------------------------------------------------------- */
 .hero__title {
-  width: 763px;
+  width: 100%;
   margin: 0;
   /* Browsers add the trailing letter-space after the last glyph of every line,
-     which pushes centred lines right by half the tracking. Figma does not, so
-     the block is nudged back by 5.4px / 2. */
-  transform: translateX(-2.7px);
+     which pushes centred lines right by half the tracking. Figma does not. */
+  transform: translateX(-0.03em);
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 90px;
-  /* 0.95 x 90px = 85.5px, which the design rounds to an 85px line advance
-     (the three lines occupy exactly 255px). */
-  line-height: 85px;
-  letter-spacing: -5.4px; /* -6% */
+  font-size: calc(90 * var(--u-hero));
+  /* 0.95 in the design, which Figma renders as an 85px advance on a 90px
+     body — the three lines occupy exactly 255px. */
+  line-height: 0.9444;
+  letter-spacing: -0.06em;
   text-align: center;
   color: var(--color-white);
 }
 
 /* Supporting copy --------------------------------------------------------- */
 .hero__subtitle {
-  width: 423px;
+  width: calc(423 * var(--u-hero));
+  max-width: 100%;
   margin: 0;
   font-family: var(--font-ui);
   font-weight: 450;
-  font-size: 20px;
+  font-size: calc(20 * var(--u-hero));
   line-height: 1.2;
-  letter-spacing: -0.4px; /* -2% */
+  letter-spacing: -0.02em;
   text-align: center;
   color: var(--color-text-muted);
 }
 
 /* ==========================================================================
-   Narrow viewports
-   The design ships a single desktop frame, so the artboard is scaled down
-   as far as it stays legible; below that the same components reflow into a
-   single column. No colours, type or components are redesigned.
+   Reflow for narrow viewports
+   Placeholder behaviour so the page stays usable below the desktop range;
+   the tablet and phone layouts are still to be designed.
    ========================================================================== */
 @media (max-width: 900px) {
-  .stage-frame {
-    width: 100%;
-    height: auto;
-  }
-
-  .stage {
-    width: 100%;
-    height: auto;
-    min-height: 100svh;
-    border-radius: 0;
-    transform: none;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Same framing of the photograph as the desktop artboard, expressed as
-     ratios of the stage: 3188/1033 tall, offset -2037/1033 from the top and
-     horizontally centred on the same point of the image. */
-  .stage__photo {
-    left: 50%;
-    top: -197.193%;
-    width: auto;
-    height: 308.616%;
-    min-width: 100%;
-    transform: translateX(-47.957%);
-    object-fit: cover;
+  :root {
+    --u-ui: 1px;
   }
 
   .site-header {
-    position: relative;
-    left: auto;
-    top: auto;
-    width: auto;
-    height: 52px;
-    flex: none;
-    margin: 20px 20px 0;
+    top: 20px;
   }
 
   .nav,
@@ -471,14 +468,12 @@ img {
   }
 
   .mobile-menu {
-    position: relative;
-    z-index: 2;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin: 10px 20px 0;
+    margin: 10px var(--gutter-end) 0 var(--gutter-start);
     padding: 14px;
-    border-radius: var(--radius-actions);
+    border-radius: 13px;
     background: var(--color-actions-surface);
     -webkit-backdrop-filter: blur(14.6px);
     backdrop-filter: blur(14.6px);
@@ -489,11 +484,9 @@ img {
   }
 
   .mobile-menu__link {
-    padding: 10px 10px;
-    font-family: var(--font-ui);
-    font-weight: 450;
+    padding: 10px;
     font-size: 16px;
-    letter-spacing: -0.32px;
+    letter-spacing: -0.02em;
     color: var(--color-text-muted);
   }
 
@@ -505,25 +498,21 @@ img {
 
   .mobile-menu__actions .button {
     flex: 1;
-    width: auto;
   }
 
   .hero {
-    position: relative;
-    left: auto;
-    top: auto;
-    width: auto;
-    flex: 1;
     justify-content: center;
-    padding: 48px 20px 72px;
+    padding-top: calc(92px + 6vh);
+    padding-bottom: 8vh;
+  }
+
+  .hero__content {
+    width: 100%;
     gap: 24px;
   }
 
   .hero__title {
-    width: 100%;
     font-size: clamp(38px, 10.2vw, 68px);
-    line-height: 0.95;
-    letter-spacing: -0.06em;
     transform: none;
   }
 
@@ -539,6 +528,10 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   * {
     transition-duration: 0.01ms !important;
   }

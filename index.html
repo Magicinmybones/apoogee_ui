@@ -12,56 +12,57 @@
 </head>
 <body>
 
-<div class="stage-frame">
-  <div class="stage">
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="#top" aria-label="Apogee — home">
+      <img class="brand__mark" src="assets/svg/apogee-mark.svg" alt="" aria-hidden="true">
+      <span class="brand__name">Apogee</span>
+    </a>
 
-    <!-- Background photograph, positioned exactly as in the source design -->
-    <img class="stage__photo" src="assets/images/hero-rocket.png" alt="" aria-hidden="true" fetchpriority="high">
-
-    <!-- Radial warm glow overlay -->
-    <div class="stage__glow" aria-hidden="true"></div>
-
-    <header class="site-header">
-      <a class="brand" href="#" aria-label="Apogee — home">
-        <img class="brand__mark" src="assets/svg/apogee-mark.svg" alt="" aria-hidden="true">
-        <span class="brand__name">Apogee</span>
+    <nav class="nav" aria-label="Primary">
+      <a class="nav__link nav__link--has-menu" href="#platform">
+        Platform
+        <svg class="nav__chevron" width="7" height="4" viewBox="-0.5 -0.5 7 4" fill="none" aria-hidden="true">
+          <path d="M0 0L3 3L6 0" stroke="currentColor" stroke-width="1"/>
+        </svg>
       </a>
+      <a class="nav__link" href="#pricing">Pricing</a>
+      <a class="nav__link" href="#resourses">Resourses</a>
+      <a class="nav__link" href="#blog">Blog</a>
+    </nav>
 
-      <nav class="nav" aria-label="Primary">
-        <a class="nav__link nav__link--has-menu" href="#platform">
-          Platform
-          <svg class="nav__chevron" width="7" height="4" viewBox="-0.5 -0.5 7 4" fill="none" aria-hidden="true">
-            <path d="M0 0L3 3L6 0" stroke="currentColor" stroke-width="1"/>
-          </svg>
-        </a>
-        <a class="nav__link" href="#pricing">Pricing</a>
-        <a class="nav__link" href="#resourses">Resourses</a>
-        <a class="nav__link" href="#blog">Blog</a>
-      </nav>
-
-      <div class="header-actions">
-        <a class="button button--ghost" href="#login">Login</a>
-        <a class="button button--solid" href="#demo">Book a demo</a>
-      </div>
-
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
-        <span class="menu-toggle__bar"></span>
-        <span class="menu-toggle__bar"></span>
-      </button>
-    </header>
-
-    <div class="mobile-menu" id="mobile-menu" hidden>
-      <a class="mobile-menu__link" href="#platform">Platform</a>
-      <a class="mobile-menu__link" href="#pricing">Pricing</a>
-      <a class="mobile-menu__link" href="#resourses">Resourses</a>
-      <a class="mobile-menu__link" href="#blog">Blog</a>
-      <div class="mobile-menu__actions">
-        <a class="button button--ghost" href="#login">Login</a>
-        <a class="button button--solid" href="#demo">Book a demo</a>
-      </div>
+    <div class="header-actions">
+      <a class="button button--ghost" href="#login">Login</a>
+      <a class="button button--solid" href="#demo">Book a demo</a>
     </div>
 
-    <main class="hero">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
+      <span class="menu-toggle__bar"></span>
+      <span class="menu-toggle__bar"></span>
+    </button>
+  </div>
+
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <a class="mobile-menu__link" href="#platform">Platform</a>
+    <a class="mobile-menu__link" href="#pricing">Pricing</a>
+    <a class="mobile-menu__link" href="#resourses">Resourses</a>
+    <a class="mobile-menu__link" href="#blog">Blog</a>
+    <div class="mobile-menu__actions">
+      <a class="button button--ghost" href="#login">Login</a>
+      <a class="button button--solid" href="#demo">Book a demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero__backdrop" aria-hidden="true">
+      <img class="hero__photo" src="assets/images/hero-rocket.png" alt="" fetchpriority="high">
+      <div class="hero__glow"></div>
+    </div>
+
+    <div class="hero__content">
       <div class="hero__badge">
         <div class="hero__badge-row">
           <span class="hero__badge-label">Backed by:</span>
@@ -75,10 +76,13 @@
       <h1 class="hero__title">Propel your&nbsp;<br>mission-critical data to&nbsp;<br>the absolute peak</h1>
 
       <p class="hero__subtitle">Advanced reasoning systems and predictive models built for the unknown</p>
-    </main>
+    </div>
+  </section>
 
-  </div>
-</div>
+  <!-- Further sections are appended here; they stack in normal document flow
+       below the full-height hero. -->
+
+</main>
 
 <script src="js/script.js"></script>
 </body>
