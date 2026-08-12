@@ -86,6 +86,9 @@
   --hero-inset: 0px;
   --hero-radius: 0px;
 
+  /* Scroll distance that drives the hero -> platform camera move. */
+  --scene-travel: 220svh;
+
   /* Colour */
   --color-void: #080A19;          /* artboard base fill                     */
   --color-white: #FFFFFF;
@@ -156,7 +159,7 @@ img {
    state to design against.
    ========================================================================== */
 .site-header {
-  position: absolute;
+  position: fixed;
   z-index: 10;
   top: calc(var(--hero-inset) + 29 * var(--u-ui));
   left: var(--hero-inset);
@@ -332,54 +335,77 @@ img {
 }
 
 /* ==========================================================================
-   Hero — one full viewport
+   Scene
+   The two designs are two framings of one photograph, so they are built as a
+   single pinned stage: the section is tall, its viewport sticks, and scroll
+   progress (--p, written by js/script.js) drives one continuous camera move
+   between them. At --p 0 the stage is the hero frame exactly; at --p 1 it is
+   the platform frame exactly.
    ========================================================================== */
-.hero {
+.scene {
   position: relative;
+  /* one viewport to read the hero, then the travel that drives the transition */
+  height: calc(100svh + var(--scene-travel, 220svh));
+}
+
+.scene__viewport {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
   isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  min-height: calc(100svh - 2 * var(--hero-inset));
-  margin: var(--hero-inset);
-  border-radius: var(--hero-radius);
-  overflow: hidden;
   background: var(--color-void);
-
-  /* The sub-copy sits 70.28px above the foot of the 1033px frame. */
   padding-bottom: clamp(40px, 6.803svh, 96px);
   padding-inline: var(--gutter-start);
 }
 
-.hero__backdrop {
+.scene__backdrop {
   position: absolute;
   inset: 0;
   z-index: -1;
   overflow: hidden;
 }
 
-/* The photograph keeps the design's framing. The artboard shows it at
-   1787/1644 of the frame's width, which is also 1787/1033 = 172.95% of the
-   frame's height; taking whichever is larger means the crop stays the design's
-   on wide displays and simply zooms in — rather than revealing more of the
-   image — on squarer ones. It is anchored so the point 80.1% down the image
-   sits on the hero's centre line, exactly as the artboard is centred. */
-.hero__photo {
+/* Compositing hints only while the camera is actually moving — held on at
+   rest they soften text and image rasterisation. */
+.is-moving .scene__camera,
+.is-moving .scene__photo,
+.is-moving .platform__content {
+  will-change: transform;
+}
+
+/* The camera: a push-in about the centre of the frame, on top of the pan. */
+.scene__camera {
+  position: absolute;
+  inset: 0;
+  transform: scale(var(--cam-z, 1));
+  transform-origin: 50% 50%;
+}
+
+/* Sized so the design's crop is preserved at any aspect (see the hero notes),
+   then framed by --cam-x / --cam-y, which travel between the two designs:
+   hero -47.957% / -80.097%  ->  platform -50% / -36.716%. */
+.scene__photo {
   position: absolute;
   left: 50%;
   top: 50%;
   width: max(108.699%, 172.95svh);
   height: auto;
   max-width: none;
-  transform: translate(-47.957%, -80.097%);
+  transform: translate(var(--cam-x, -47.957%), var(--cam-y, -80.097%));
   user-select: none;
 }
 
-.hero__glow {
+/* Only the hero frame carries the warm wash. */
+.scene__glow {
   position: absolute;
   inset: 0;
   background: var(--glow);
+  opacity: var(--glow-o, 1);
 }
 
 .hero__content {
@@ -389,6 +415,8 @@ img {
   gap: calc(30 * var(--u-hero));
   width: calc(763 * var(--u-hero));
   max-width: 100%;
+  opacity: var(--hero-o, 1);
+  visibility: var(--hero-vis, visible);
 }
 
 /* "Backed by: Y Combinator" pill ------------------------------------------ */
@@ -462,47 +490,25 @@ img {
 }
 
 /* ==========================================================================
-   Platform section
-   Reproduces the second design frame (also 1644 x 1033). Everything inside is
-   positioned in the design's own coordinates, scaled by --u-shot.
+   Platform frame
+   Shares the scene's viewport; positioned in the second design's coordinates.
    ========================================================================== */
-.platform {
-  position: relative;
-  isolation: isolate;
-  min-height: 100svh;
-  overflow: hidden;
-  background: var(--color-void);
-}
-
-.platform__backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-}
-
-/* Same photograph, framed on the point 36.7% down the image — the crop the
-   second frame uses. Sized like the hero's, see .hero__photo. */
-.platform__photo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: max(108.699%, 172.95svh);
-  height: auto;
-  max-width: none;
-  transform: translate(-50%, -36.716%);
-  user-select: none;
-}
-
 .platform__content {
   position: absolute;
   left: 50%;
   top: 20.813%; /* 215 / 1033 */
   width: calc(901 * var(--u-shot));
-  transform: translateX(-50%);
+  /* The frame arrives as one piece: the whole group rises 555 design px —
+     the travel measured off the reference animation, which moves the pill,
+     the heading and the product window together. */
+  transform:
+    translateX(-50%)
+    translateY(calc((1 - var(--plat-p, 1)) * 555 * var(--u-shot)));
+  opacity: var(--plat-o, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
+  visibility: var(--plat-vis, hidden);
 }
 
 /* The design seats the pill and the heading 8.25px left of the group's axis,
@@ -1064,6 +1070,69 @@ img {
 }
 
 /* ==========================================================================
+   Opening
+   Timings read off the reference animation: the header settles first, the
+   three headline lines rise in on a 0.15s stagger, then the badge and
+   sub-copy. Each line travels 0.4em, which is the rise measured in the video.
+   The intro animates the elements *inside* .hero__content while scroll drives
+   the container, so the two never fight over the same property.
+   ========================================================================== */
+.js .site-header,
+.js .hero__title .line,
+.js .hero__badge,
+.js .hero__subtitle {
+  opacity: 0;
+}
+
+.js .hero__title .line {
+  transform: translateY(0.4em);
+}
+
+.js .hero__badge,
+.js .hero__subtitle {
+  transform: translateY(16px);
+}
+
+.is-ready .site-header {
+  animation: fade-in 0.35s linear forwards;
+}
+
+.is-ready .hero__title .line {
+  animation: rise-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.is-ready .hero__title .line:nth-child(1) { animation-delay: 0.07s; }
+.is-ready .hero__title .line:nth-child(2) { animation-delay: 0.22s; }
+.is-ready .hero__title .line:nth-child(3) { animation-delay: 0.37s; }
+
+.is-ready .hero__badge,
+.is-ready .hero__subtitle {
+  animation: rise-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+}
+
+/* Loading with the page already scrolled, or with reduced motion, skips it. */
+.is-instant .site-header,
+.is-instant .hero__title .line,
+.is-instant .hero__badge,
+.is-instant .hero__subtitle {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+
+@keyframes rise-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero__title .line {
+  display: block;
+}
+
+/* ==========================================================================
    Reflow for narrow viewports
    Placeholder behaviour so the page stays usable below the desktop range;
    the tablet and phone layouts are still to be designed.
@@ -1157,5 +1226,12 @@ img {
 
   * {
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  /* The scroll-linked camera stays — it is driven by the reader, not by the
+     page — but the push-in is dropped and the scene is shortened. */
+  :root {
+    --scene-travel: 120svh;
   }
 }

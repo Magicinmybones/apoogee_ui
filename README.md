@@ -111,13 +111,55 @@ generic icon set.
 
 All four are self-hosted in `assets/fonts/` as WOFF2.
 
+## Motion
+
+The two frames are two framings of the *same* photograph — the hero crops it at
+`-35, -2037`, the platform frame at `-71, -654` — so the move between them is
+one continuous camera travel, not a crossfade between two pictures. The page is
+built around that: a single pinned scene holds one photo layer, and scroll
+progress drives one timeline.
+
+* `.scene` is `100svh + --scene-travel` tall; `.scene__viewport` sticks to the
+  top for its duration.
+* `js/script.js` writes a progress value and a handful of custom properties;
+  CSS does the rest. Each element is a *track* with its own window and easing,
+  so nothing is a hard-coded pair of keyframes.
+* At progress 0 the stage is the hero frame exactly; at progress 1 it is the
+  platform frame exactly. Both were re-verified pixel-for-pixel after the
+  animation was added.
+
+The timings come from tracking the reference animation frame by frame — the
+photograph's offset and scale were solved per frame against the source image,
+and each element's opacity and position were measured — then normalised onto
+the scroll timeline:
+
+| Track | Window | Notes |
+| --- | --- | --- |
+| camera pan | 0 → 0.86, linear | measured 0.447 of the way at 0.377 of the timeline, against 0.444 for a straight line; it lands the framing before the content finishes settling, then holds |
+| camera push-in | peaks mid-travel | the reference is at 1.108x at that same point |
+| glow out | 0 → 0.36 | only the hero frame carries the warm wash |
+| hero copy out | 0.29 → 0.41 | it holds at full strength while the camera climbs, then goes quickly |
+| platform frame up | 0.557 → 0.984, ease-out cubic | pill, heading and product window rise 555px together as one piece |
+| platform frame in | 0.567 → 0.623 | fades up during the first part of that rise |
+
+The opening is a separate, load-time timeline in CSS, also measured from the
+reference: the header settles first, the three headline lines rise 0.4em on a
+0.15s stagger, then the badge and sub-copy. It animates the elements *inside*
+`.hero__content` while scroll drives the container, so the two never contend
+for the same property. It is skipped if the page loads part-scrolled.
+
+**One deliberate difference from the reference.** Its camera keeps zooming past
+the platform frame, resting at about 1.65x with a much larger sun than
+`Untitled_12.fig` shows. Ending there would mean section two no longer matches
+its own design, so the travel resolves onto the Figma frame instead and the
+push-in returns to 1. Everything up to that point follows the reference. If the
+video's ending is what you want, raising `CAM.push` and dropping the resolve is
+a small change in `js/script.js`.
+
 ## Layout architecture
 
-The page is a normal stack of sections, not a scaled artboard. The hero is a
-`min-height: 100svh` section, so it always occupies exactly one viewport with
-nothing below the fold, and further sections append after it in document flow.
-The header is absolutely positioned over the hero and is ready to be made
-sticky once there is a scrolled state to design against.
+The header is fixed, which is how both design frames show it. Further sections
+follow the scene in normal document flow.
 
 Everything is driven by two fluid units declared in `:root`. Both equal exactly
 `1px` at the design's 1644px reference width — so at that width the page
@@ -128,6 +170,9 @@ reproduces the Figma frame — and scale with the viewport either side of it:
 | `--u-ui` | header, nav, buttons, badge | clamped 0.93 → 1.15, so 14px labels stay legible on a 1280 laptop and don't balloon on a 2560 display |
 | `--u-hero` | hero headline, sub-copy, measure, gaps | clamped 0.74 → 1.30, tracking the viewport almost exactly so the poster keeps the design's proportions |
 | `--u-shot` | the whole platform composition | `min(width, height)` fit, clamped 0.62 → 1.45 |
+
+Motion state travels the same way: `--p`, `--cam-x/y/z`, `--glow-o`, `--hero-o`,
+`--plat-o` and `--plat-p` are the only values JavaScript writes.
 
 `--u-shot` is deliberately a *contain* fit rather than a width fit. The product
 window is cropped by the foot of its frame by design, and only a fit that
@@ -163,6 +208,11 @@ the design's own 1644 × 1033 render. At that reference size every element
 pixel of its Figma coordinates, and the mean per-pixel difference over the
 whole frame is ~1%, accounted for by text antialiasing and image resampling.
 
+The animation was verified against the reference frame by frame, and both
+endpoints re-checked after it was added: the hero still matches the Figma
+render to ~1% and the platform frame is within antialiasing noise of its
+pre-animation render.
+
 Both sections were then checked at 2560×1440, 1920×1080, 1728×1117, 1680×1050,
 1644×1033, 1600×900, 1512×982, 1440×900, 1366×768, 1280×1024, 1280×800,
 1280×720, 1152×720 and 1024×768. At every one:
@@ -171,4 +221,9 @@ Both sections were then checked at 2560×1440, 1920×1080, 1728×1117, 1680×105
 * the photograph covers its section on all four edges;
 * the platform content starts at 20.81% of the section height, matching Figma;
 * the product window shows 81.6% of its height on 16:9 displays, as designed;
+* progress reaches exactly 0 and exactly 1 at the ends of the scene;
 * the console is clean.
+
+`prefers-reduced-motion` drops the opening and the push-in and shortens the
+scene; the camera itself stays, since it is driven by the reader rather than
+playing on its own.

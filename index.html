@@ -56,13 +56,19 @@
 
 <main id="top">
 
-  <section class="hero">
-    <div class="hero__backdrop" aria-hidden="true">
-      <img class="hero__photo" src="assets/images/hero-rocket.png" alt="" fetchpriority="high">
-      <div class="hero__glow"></div>
-    </div>
+  <!-- Both designs are two framings of the same photograph, so they share one
+       camera: the section is pinned and scroll drives the move between them. -->
+  <section class="scene" id="scene">
+    <div class="scene__viewport">
 
-    <div class="hero__content">
+      <div class="scene__backdrop" aria-hidden="true">
+        <div class="scene__camera">
+          <img class="scene__photo" src="assets/images/hero-rocket.png" alt="" fetchpriority="high">
+        </div>
+        <div class="scene__glow"></div>
+      </div>
+
+      <div class="hero__content">
       <div class="hero__badge">
         <div class="hero__badge-row">
           <span class="hero__badge-label">Backed by:</span>
@@ -72,19 +78,18 @@
 
       <!-- The source text is "Propel your <LS>mission-critical data to <LS>the absolute peak".
            The spaces before each U+2028 line separator are part of the line and are
-           counted when the line is centred, so they are kept as non-breaking spaces. -->
-      <h1 class="hero__title">Propel your&nbsp;<br>mission-critical data to&nbsp;<br>the absolute peak</h1>
+           counted when the line is centred, so they are kept as non-breaking spaces.
+           Each line is its own block so the intro can stagger them. -->
+      <h1 class="hero__title">
+        <span class="line">Propel your&nbsp;</span>
+        <span class="line">mission-critical data to&nbsp;</span>
+        <span class="line">the absolute peak</span>
+      </h1>
 
       <p class="hero__subtitle">Advanced reasoning systems and predictive models built for the unknown</p>
-    </div>
-  </section>
+      </div>
 
-  <section class="platform">
-    <div class="platform__backdrop" aria-hidden="true">
-      <img class="platform__photo" src="assets/images/hero-rocket.png" alt="">
-    </div>
-
-    <div class="platform__content">
+      <div class="platform__content">
       <p class="pill">
         <span class="pill__dot" aria-hidden="true"></span>
         Live Data Stream
@@ -205,11 +210,13 @@
             </article>
           </div>
         </div>
+        </div>
       </div>
+
     </div>
   </section>
 
-  <!-- Further sections are appended here; they stack in normal document flow. -->
+  <!-- Further sections are appended here; they follow the scene in normal flow. -->
 
 </main>
 
