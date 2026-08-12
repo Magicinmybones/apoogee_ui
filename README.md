@@ -124,6 +124,13 @@ progress drives one timeline.
 * `js/script.js` writes a progress value and a handful of custom properties;
   CSS does the rest. Each element is a *track* with its own window and easing,
   so nothing is a hard-coded pair of keyframes.
+* Scroll supplies the *target*; what renders eases toward it, frame-rate
+  independently. Mapping the timeline straight onto `scrollY` looks right in a
+  slow drag but collapses on a flick — one wheel gesture can cover the whole
+  scene in a single frame, which reads as no animation at all. With damping a
+  hard flick still plays the move out over about a second, and a deliberate
+  scroll stays in step. It snaps when it is within 0.0004 of the target, so
+  both ends stay pixel-exact.
 * At progress 0 the stage is the hero frame exactly; at progress 1 it is the
   platform frame exactly. Both were re-verified pixel-for-pixel after the
   animation was added.

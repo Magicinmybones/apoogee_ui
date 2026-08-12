@@ -99,9 +99,22 @@
 
   /* ------------------------------------------------------------------
      Scroll binding
+
+     Scroll gives the *target*; what gets rendered eases toward it. Mapping
+     the timeline straight onto scrollY looks correct in a slow drag but
+     collapses on a flick — a single wheel gesture can jump the whole scene in
+     one frame, which reads as no animation at all. Damping means a flick still
+     plays the move out, while a deliberate scroll stays in step.
+
+     The step is frame-rate independent: an exponential approach to the target
+     over real elapsed time, so it behaves the same at 60Hz and 120Hz.
      ------------------------------------------------------------------ */
-  var ticking = false;
-  var lastP = -1;
+  var SETTLE = 5.5;      /* approach rate, per second */
+  var EPSILON = 0.0004;  /* close enough to snap, so the ends stay exact */
+
+  var current = 0;
+  var frameId = null;
+  var lastTime = 0;
 
   function progress() {
     if (!scene) return 0;
@@ -110,27 +123,39 @@
     return clamp01((window.scrollY - scene.offsetTop) / travel);
   }
 
-  function update() {
-    ticking = false;
-    var p = progress();
-    if (Math.abs(p - lastP) < 0.0002) return;
-    lastP = p;
-    apply(p);
-  }
+  function frame(now) {
+    var dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 1 / 60;
+    lastTime = now;
 
-  function onScroll() {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(update);
+    var target = progress();
+    if (reduced) {
+      current = target;
+    } else {
+      current += (target - current) * (1 - Math.exp(-SETTLE * dt));
+      if (Math.abs(target - current) < EPSILON) current = target;
+    }
+
+    apply(current);
+
+    if (current !== target) {
+      frameId = requestAnimationFrame(frame);
+    } else {
+      frameId = null;
+      lastTime = 0;
     }
   }
 
-  apply(progress());
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', function () {
-    lastP = -1;
-    update();
-  });
+  function kick() {
+    if (frameId === null) {
+      lastTime = 0;
+      frameId = requestAnimationFrame(frame);
+    }
+  }
+
+  current = progress();
+  apply(current);
+  window.addEventListener('scroll', kick, { passive: true });
+  window.addEventListener('resize', kick);
 
   /* ------------------------------------------------------------------
      Opening. Skipped when the page loads part-scrolled, or on request.

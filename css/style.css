@@ -86,8 +86,10 @@
   --hero-inset: 0px;
   --hero-radius: 0px;
 
-  /* Scroll distance that drives the hero -> platform camera move. */
-  --scene-travel: 220svh;
+  /* Scroll distance that drives the hero -> platform camera move. Long enough
+     that an ordinary scroll takes about as long as the reference animation's
+     three seconds, rather than skipping past the move. */
+  --scene-travel: 300svh;
 
   /* Colour */
   --color-void: #080A19;          /* artboard base fill                     */
