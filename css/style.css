@@ -1,0 +1,545 @@
+/* ==========================================================================
+   Apogee — hero landing page
+   Implemented 1:1 from the source Figma frame (1644 x 1033).
+   Every numeric value below is taken directly from the design file.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Fonts
+   - STIX Two Math ....... the display serif used by the headline and wordmark
+                           (the exact family specified in the design).
+   - Switzer ............. closest available match for "Suisse Intl Book"
+                           (variable, set to the design's 450 weight).
+   - General Sans ........ closest available match for "Aeonik Regular".
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'STIX Two Math';
+  src: url('../assets/fonts/stix-two-math.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('../assets/fonts/switzer-variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('../assets/fonts/general-sans-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   Design tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* Artboard */
+  --stage-width: 1644px;
+  --stage-height: 1033px;
+  --stage-radius: 42px;
+  --stage-scale: 1;
+
+  /* Colour */
+  --color-void: #080A19;          /* artboard base fill                     */
+  --color-white: #FFFFFF;
+  --color-ink: #0A0707;           /* solid button label                     */
+  --color-button-solid: #E9E9E9;
+  --color-nav-surface: rgba(10, 7, 7, 0.35);
+  --color-actions-surface: rgba(0, 0, 0, 0.35);
+  --color-badge-surface: rgba(0, 0, 0, 0.3);
+  --color-text-muted: rgba(255, 255, 255, 0.8);
+
+  /* The warm radial wash laid over the photograph */
+  --glow: radial-gradient(
+    109.987% 112.486% at 50% 0%,
+    rgba(247, 127, 113, 0) 66.43%,
+    rgba(247, 127, 113, 0.5) 84.06%,
+    rgba(255, 80, 60, 1) 100%
+  );
+
+  /* Type */
+  --font-display: 'STIX Two Math', 'STIX Two Text', 'Times New Roman', serif;
+  --font-ui: 'Switzer', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-label: 'General Sans', 'Switzer', 'Inter', Arial, sans-serif;
+
+  /* Radii */
+  --radius-nav: 11px;
+  --radius-actions: 13px;
+  --radius-badge: 5px;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  display: flex;
+  background: var(--color-void);
+  color: var(--color-white);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Stage
+   The artboard is reproduced at its native 1644 x 1033 and uniformly scaled
+   down to fit narrower viewports, so proportions stay exact.
+   -------------------------------------------------------------------------- */
+.stage-frame {
+  width: calc(var(--stage-width) * var(--stage-scale));
+  height: calc(var(--stage-height) * var(--stage-scale));
+  margin: auto; /* centres the artboard on viewports larger than the design */
+}
+
+.stage {
+  position: relative;
+  width: var(--stage-width);
+  height: var(--stage-height);
+  border-radius: var(--stage-radius);
+  background: var(--color-void);
+  overflow: hidden;
+  transform: scale(var(--stage-scale));
+  transform-origin: top left;
+}
+
+/* Background photograph — placed with the exact offset and size of the
+   image layer inside the Figma mask group. */
+.stage__photo {
+  position: absolute;
+  left: -35px;
+  top: -2037px;
+  width: 1787px;
+  height: 3188px;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.stage__glow {
+  position: absolute;
+  inset: 0;
+  background: var(--glow);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.site-header {
+  position: absolute;
+  left: 35px;
+  top: 29px;
+  width: 1571px;
+  height: 52px;
+}
+
+/* Brand ------------------------------------------------------------------- */
+.brand {
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 131px;
+  height: 38px;
+  display: block;
+}
+
+.brand__mark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 32.4336px;
+  height: 38.001px;
+}
+
+.brand__name {
+  position: absolute;
+  left: 44px;
+  top: 5px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 0.95;
+  letter-spacing: -1.8px; /* -6% */
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+/* Primary navigation ------------------------------------------------------ */
+.nav {
+  position: absolute;
+  left: 616.5px;
+  top: 0;
+  width: 343px;
+  height: 52px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  border-radius: var(--radius-nav);
+  background: var(--color-nav-surface);
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.28px; /* -2% */
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.nav__link:hover {
+  color: var(--color-white);
+}
+
+.nav__chevron {
+  flex: none;
+  overflow: visible;
+}
+
+/* Header buttons ---------------------------------------------------------- */
+.header-actions {
+  position: absolute;
+  left: 1345px;
+  top: 0;
+  width: 226px;
+  height: 52px;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-actions);
+  background: var(--color-actions-surface);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--radius-nav);
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.28px; /* -2% */
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.button--ghost {
+  width: 84px;
+  background: transparent;
+  color: var(--color-white);
+}
+
+.button--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.button--solid {
+  width: 131px;
+  background: var(--color-button-solid);
+  color: var(--color-ink);
+}
+
+.button--solid:hover {
+  background: var(--color-white);
+}
+
+/* Mobile menu trigger — hidden at the design's own viewport size ----------- */
+.menu-toggle {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-actions);
+  background: var(--color-actions-surface);
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.menu-toggle__bar {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--color-white);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.menu-toggle[aria-expanded='true'] .menu-toggle__bar:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+
+.menu-toggle[aria-expanded='true'] .menu-toggle__bar:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
+.mobile-menu {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   Vertical stack, centred, 30px between blocks — mirrors the auto-layout of
+   the "Frame 2147237597" group.
+   -------------------------------------------------------------------------- */
+.hero {
+  position: absolute;
+  left: 441px;
+  top: 556px;
+  width: 763px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* "Backed by: Y Combinator" pill ------------------------------------------ */
+.hero__badge {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 9.86px 14.0305px;
+  border-radius: var(--radius-badge);
+  background: var(--color-badge-surface);
+  -webkit-backdrop-filter: blur(14.6px);
+  backdrop-filter: blur(14.6px);
+}
+
+.hero__badge-row {
+  display: flex;
+  align-items: center;
+  min-height: 24px; /* height of the row in the design */
+  gap: 8.1845px;
+}
+
+.hero__badge-label {
+  /* Width of the label in the design; pinned so the pill and the logo keep
+     their exact positions regardless of the substituted label typeface. */
+  width: 69px;
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: 14.0305px;
+  line-height: 23.3842px;
+  letter-spacing: -0.1403px; /* -1% */
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+.hero__badge-logo {
+  flex: none;
+  width: 93.3907px;
+  height: 18.7367px;
+}
+
+/* Headline ---------------------------------------------------------------- */
+.hero__title {
+  width: 763px;
+  margin: 0;
+  /* Browsers add the trailing letter-space after the last glyph of every line,
+     which pushes centred lines right by half the tracking. Figma does not, so
+     the block is nudged back by 5.4px / 2. */
+  transform: translateX(-2.7px);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 90px;
+  /* 0.95 x 90px = 85.5px, which the design rounds to an 85px line advance
+     (the three lines occupy exactly 255px). */
+  line-height: 85px;
+  letter-spacing: -5.4px; /* -6% */
+  text-align: center;
+  color: var(--color-white);
+}
+
+/* Supporting copy --------------------------------------------------------- */
+.hero__subtitle {
+  width: 423px;
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.4px; /* -2% */
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   Narrow viewports
+   The design ships a single desktop frame, so the artboard is scaled down
+   as far as it stays legible; below that the same components reflow into a
+   single column. No colours, type or components are redesigned.
+   ========================================================================== */
+@media (max-width: 900px) {
+  .stage-frame {
+    width: 100%;
+    height: auto;
+  }
+
+  .stage {
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+    border-radius: 0;
+    transform: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Same framing of the photograph as the desktop artboard, expressed as
+     ratios of the stage: 3188/1033 tall, offset -2037/1033 from the top and
+     horizontally centred on the same point of the image. */
+  .stage__photo {
+    left: 50%;
+    top: -197.193%;
+    width: auto;
+    height: 308.616%;
+    min-width: 100%;
+    transform: translateX(-47.957%);
+    object-fit: cover;
+  }
+
+  .site-header {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    height: 52px;
+    flex: none;
+    margin: 20px 20px 0;
+  }
+
+  .nav,
+  .header-actions {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .mobile-menu {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 10px 20px 0;
+    padding: 14px;
+    border-radius: var(--radius-actions);
+    background: var(--color-actions-surface);
+    -webkit-backdrop-filter: blur(14.6px);
+    backdrop-filter: blur(14.6px);
+  }
+
+  .mobile-menu[hidden] {
+    display: none;
+  }
+
+  .mobile-menu__link {
+    padding: 10px 10px;
+    font-family: var(--font-ui);
+    font-weight: 450;
+    font-size: 16px;
+    letter-spacing: -0.32px;
+    color: var(--color-text-muted);
+  }
+
+  .mobile-menu__actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+  }
+
+  .mobile-menu__actions .button {
+    flex: 1;
+    width: auto;
+  }
+
+  .hero {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    flex: 1;
+    justify-content: center;
+    padding: 48px 20px 72px;
+    gap: 24px;
+  }
+
+  .hero__title {
+    width: 100%;
+    font-size: clamp(38px, 10.2vw, 68px);
+    line-height: 0.95;
+    letter-spacing: -0.06em;
+    transform: none;
+  }
+
+  .hero__title br {
+    display: none;
+  }
+
+  .hero__subtitle {
+    width: 100%;
+    max-width: 423px;
+    font-size: clamp(15px, 4.2vw, 20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
