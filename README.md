@@ -1,7 +1,7 @@
-# Apogee — hero landing page
+# Apogee — landing page
 
 A static HTML / CSS / vanilla-JavaScript implementation of the supplied Figma
-file (`Untitled_5.fig`). No frameworks, no build step — open `index.html`, or
+files (`Untitled_5.fig`, `Untitled_12.fig`). No frameworks, no build step — open `index.html`, or
 serve the folder with any static server:
 
 ```bash
@@ -14,13 +14,20 @@ The `.fig` file was unpacked and its `canvas.fig` payload (Kiwi binary schema +
 zstd-compressed node data) was decoded, so every value below comes from the
 design data itself rather than from a screenshot.
 
-The document contains one visible artboard — a **1644 × 1033** frame with a
-42px corner radius. The only other top-level frame (`Dribbble shot HD - 91`,
-a presentation mock-up wrapping the same artboard) is hidden in the file, as is
-the analytics-dashboard group inside the artboard. There are no tablet or
-mobile frames and no prototype interactions defined.
+Each file holds one **1644 × 1033** website frame with a 42px corner radius,
+wrapped in a `Dribbble shot HD` presentation box. That wrapper — and the
+photographer credit labels on it — are presentation furniture and are not part
+of the site, so only the inner frame is built. Both files also carry the site
+header inside the frame; it is implemented once, at page level.
 
-## Layout values taken from the design
+Neither file defines tablet or mobile frames, or any prototype interaction.
+
+| Section | Source | Frame |
+| --- | --- | --- |
+| Hero | `Untitled_5.fig` | photo cropped at `-35, -2037`, warm radial glow, headline stack |
+| Platform | `Untitled_12.fig` | same photo cropped at `-71, -654` (the red sun), no glow, product window |
+
+## Hero values taken from the design
 
 | Element | Value |
 | --- | --- |
@@ -51,6 +58,29 @@ The Figma background-blur radius of 29.2 corresponds to `backdrop-filter:
 blur(14.6px)`; this was confirmed by sweeping values against the design's own
 render.
 
+## Platform section values
+
+| Element | Value |
+| --- | --- |
+| Content group | `372, 215`, 901 × 943 — deliberately taller than the frame, so the product window is cropped by its foot |
+| "Live Data Stream" pill | 138 × 36, radius 6, `rgba(10,7,7,.35)`, 12/16 padding, 4px dot |
+| Heading | 48px, line height 0.95 (46px advance), tracking −6%, 469px wide, 3 lines |
+| Product window | 901 × 680 at `0, 263`; surface `rgba(17,16,15,.35)`, radius 7, background blur 98.5 |
+| Browser toolbar | 899.24 × 37.23, `#191C1F`, address bar `#0C0F12` radius 4.215 |
+| Product nav | 901 × 29 at `0, 48`, hairline at 20% with a full-strength 102px active run |
+| Cards | 282 × 247 and 426 × 247, radius 23, `rgba(17,16,15,.35)` |
+
+The charts are generated from the design's own primitives rather than redrawn:
+the revenue sparkline is its 62 line elements (32 at full strength, the rest at
+10%) plus five grid rules, the lead-performance grid is its 84 dots in the
+exact white / `#3E332F` pattern, and the sales columns keep their 2px caps and
+single highlighted bar.
+
+One deliberate departure: the design stops the window surface at 627px because
+the frame crops it long before that, which leaves the lower cards floating on
+displays tall enough to show the window's foot. The surface is carried down to
+the full 680px instead. Nothing changes at the design's own proportions.
+
 ## Assets
 
 Everything is extracted from the `.fig` file — nothing is substituted with a
@@ -65,6 +95,10 @@ generic icon set.
 * `assets/svg/favicon.svg` — the site icon, built from the same mark.
 * The `Platform` chevron is inlined in `index.html` so it can inherit the link
   colour on hover; its path is the design's own geometry.
+* `assets/svg/dashboard/` — the browser chrome glyphs and product nav icons,
+  decoded from the file's vector geometry, plus the three charts generated
+  from the design's line, dot and bar data.
+* `assets/images/avatar-jane.jpg` — the embedded avatar.
 
 ## Fonts
 
@@ -73,8 +107,9 @@ generic icon set.
 | STIX Two Math Regular | **STIX Two Math** | The exact family, self-hosted from Google Fonts. |
 | Suisse Intl Book (450) | Switzer Variable @ 450 | Suisse Intl is a licensed retail font. Switzer is the closest freely available neo-grotesque; rendered widths land within ~2–4% of the design's measurements. |
 | Aeonik Regular | General Sans 400 | Aeonik is likewise a licensed font; used only by the "Backed by:" label, whose box is pinned to the design's 69px width so the pill geometry stays exact. |
+| Inter Regular | **Inter** | The exact family, latin subset. Used only by the browser address bar inside the product window. |
 
-All three are self-hosted in `assets/fonts/` as WOFF2.
+All four are self-hosted in `assets/fonts/` as WOFF2.
 
 ## Layout architecture
 
@@ -91,7 +126,15 @@ reproduces the Figma frame — and scale with the viewport either side of it:
 | Unit | Drives | Range |
 | --- | --- | --- |
 | `--u-ui` | header, nav, buttons, badge | clamped 0.93 → 1.15, so 14px labels stay legible on a 1280 laptop and don't balloon on a 2560 display |
-| `--u-hero` | headline, sub-copy, measure, gaps | clamped 0.74 → 1.30, tracking the viewport almost exactly so the poster keeps the design's proportions |
+| `--u-hero` | hero headline, sub-copy, measure, gaps | clamped 0.74 → 1.30, tracking the viewport almost exactly so the poster keeps the design's proportions |
+| `--u-shot` | the whole platform composition | `min(width, height)` fit, clamped 0.62 → 1.45 |
+
+`--u-shot` is deliberately a *contain* fit rather than a width fit. The product
+window is cropped by the foot of its frame by design, and only a fit that
+respects height as well keeps that crop identical: 81.6% of the window shows at
+every 16:9 size, exactly as in Figma. A width-only fit would swallow the lower
+cards on the 16:9 displays that most laptops use. On viewports squarer than the
+design, more of the window shows — never less.
 
 Every dimension is then written as the design's own number, e.g.
 `font-size: calc(90 * var(--u-hero))` — the Figma values stay readable in the
@@ -120,8 +163,12 @@ the design's own 1644 × 1033 render. At that reference size every element
 pixel of its Figma coordinates, and the mean per-pixel difference over the
 whole frame is ~1%, accounted for by text antialiasing and image resampling.
 
-It was then checked at 2560×1440, 1920×1080, 1728×1117, 1680×1050, 1600×900,
-1512×982, 1440×900, 1366×768, 1280×1024, 1280×800, 1280×720, 1152×720 and
-1024×768. At every one the hero occupies exactly one viewport — no vertical or
-horizontal scrollbar, no overlap between the header and the hero copy — the
-photograph covers the frame on all four edges, and the console is clean.
+Both sections were then checked at 2560×1440, 1920×1080, 1728×1117, 1680×1050,
+1644×1033, 1600×900, 1512×982, 1440×900, 1366×768, 1280×1024, 1280×800,
+1280×720, 1152×720 and 1024×768. At every one:
+
+* each section occupies exactly one viewport height, with no horizontal scroll;
+* the photograph covers its section on all four edges;
+* the platform content starts at 20.81% of the section height, matching Figma;
+* the product window shows 81.6% of its height on 16:9 displays, as designed;
+* the console is clean.

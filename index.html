@@ -79,8 +79,137 @@
     </div>
   </section>
 
-  <!-- Further sections are appended here; they stack in normal document flow
-       below the full-height hero. -->
+  <section class="platform">
+    <div class="platform__backdrop" aria-hidden="true">
+      <img class="platform__photo" src="assets/images/hero-rocket.png" alt="">
+    </div>
+
+    <div class="platform__content">
+      <p class="pill">
+        <span class="pill__dot" aria-hidden="true"></span>
+        Live Data Stream
+      </p>
+
+      <h2 class="platform__title">Ascend beyond limits with intelligent predictive infrastructure</h2>
+
+      <!-- Product view, presented in a browser window as in the design -->
+      <div class="shot">
+        <div class="shot__window">
+          <div class="shot__toolbar">
+            <div class="shot__lights" aria-hidden="true">
+              <span class="shot__light shot__light--close"></span>
+              <span class="shot__light shot__light--minimize"></span>
+              <span class="shot__light shot__light--fullscreen"></span>
+            </div>
+            <img class="shot__icon shot__icon--sidebar" src="assets/svg/dashboard/sf-sidebar-left.svg" alt="" aria-hidden="true">
+            <div class="shot__group shot__group--history" aria-hidden="true">
+              <img class="shot__icon" src="assets/svg/dashboard/sf-back.svg" alt="">
+              <img class="shot__icon" src="assets/svg/dashboard/sf-forward.svg" alt="">
+            </div>
+            <div class="shot__address">
+              <img class="shot__icon shot__icon--shield" src="assets/svg/dashboard/sf-shield.svg" alt="" aria-hidden="true">
+              <div class="shot__url">
+                <span class="shot__url-inner">
+                  <img class="shot__lock" src="assets/svg/dashboard/sf-lock-small.svg" alt="" aria-hidden="true">
+                  <span class="shot__host">apogee.ai</span>
+                </span>
+                <img class="shot__reload" src="assets/svg/dashboard/sf-reload.svg" alt="" aria-hidden="true">
+              </div>
+            </div>
+            <div class="shot__group shot__group--tools" aria-hidden="true">
+              <img class="shot__icon" src="assets/svg/dashboard/sf-downloads.svg" alt="">
+              <img class="shot__icon" src="assets/svg/dashboard/sf-share.svg" alt="">
+              <img class="shot__icon" src="assets/svg/dashboard/sf-plus.svg" alt="">
+              <img class="shot__icon" src="assets/svg/dashboard/sf-tabs.svg" alt="">
+            </div>
+          </div>
+
+          <nav class="dash-nav" aria-label="Product">
+            <ul class="dash-nav__list">
+              <li><a class="dash-nav__item is-active" href="#dashboard"><img src="assets/svg/dashboard/nav-dashboard.svg" alt="" aria-hidden="true">Dashboard</a></li>
+              <li><a class="dash-nav__item" href="#data"><img src="assets/svg/dashboard/nav-data.svg" alt="" aria-hidden="true">Data</a></li>
+              <li><a class="dash-nav__item" href="#network"><img src="assets/svg/dashboard/nav-network.svg" alt="" aria-hidden="true">Network</a></li>
+              <li><a class="dash-nav__item" href="#analytics"><img src="assets/svg/dashboard/nav-analytics.svg" alt="" aria-hidden="true">Analytics</a></li>
+              <li><a class="dash-nav__item" href="#setting"><img src="assets/svg/dashboard/nav-setting.svg" alt="" aria-hidden="true">Setting</a></li>
+            </ul>
+            <p class="dash-nav__user">
+              <span class="dash-nav__avatar">
+                <img src="assets/images/avatar-jane.jpg" alt="">
+                <span class="dash-nav__status" aria-hidden="true"></span>
+              </span>
+              Jane D.
+            </p>
+          </nav>
+
+          <div class="dash">
+            <p class="dash__tabs">
+              <span class="dash__tab is-active">Global</span>
+              <span class="dash__tab">Cluster</span>
+              <span class="dash__tab">Insights</span>
+            </p>
+
+            <article class="card card--revenue">
+              <h3 class="card__title">Revenue Growth</h3>
+              <p class="card__figure">$14,205,890<span class="card__figure-minor">.00</span></p>
+              <p class="card__delta">
+                <span class="tag">+32.4%</span>
+                <span class="card__delta-note">vs. previous period ($10.7M)</span>
+              </p>
+              <img class="card__chart card__chart--revenue" src="assets/svg/dashboard/revenue-chart.svg" alt="" aria-hidden="true">
+              <p class="card__axis" aria-hidden="true">
+                <span>10:00</span><span>12:00</span><span>14:00</span><span>16:00</span><span>16:00</span>
+              </p>
+            </article>
+
+            <article class="card card--leads">
+              <h3 class="card__title">Lead Perfomance</h3>
+              <div class="card__stats">
+                <p class="stat"><span class="stat__label">Total Generated</span><span class="stat__value">84,592</span></p>
+                <p class="stat stat--wide"><span class="stat__label">AI-Qualified (AQI)</span><span class="stat__value">94.2%</span></p>
+              </div>
+              <img class="card__chart card__chart--leads" src="assets/svg/dashboard/lead-grid.svg" alt="" aria-hidden="true">
+            </article>
+
+            <article class="card card--sales">
+              <h3 class="card__title">Sales Trend</h3>
+              <div class="card__stats">
+                <p class="stat"><span class="stat__label">Active Pipeline</span><span class="stat__value stat__value--sm">$4.8M</span></p>
+                <p class="stat stat--wide"><span class="stat__label">Win Rate Prediction</span><span class="stat__value stat__value--sm">85%</span></p>
+              </div>
+              <img class="card__chart card__chart--sales" src="assets/svg/dashboard/sales-chart.svg" alt="" aria-hidden="true">
+            </article>
+
+            <article class="card card--log">
+              <h3 class="card__title">Real-time inference log</h3>
+              <ul class="log">
+                <li class="log__row">
+                  <span class="log__line"><span class="log__tag">[SYS]</span><span class="log__text">Initiating deep-scan protocol</span></span>
+                  <span class="log__state">DONE</span>
+                </li>
+                <li class="log__row">
+                  <span class="log__line"><span class="log__tag">[AI]</span><span class="log__text">Model 'Apogee-V4' loaded. Latency: 0.08ms</span></span>
+                </li>
+                <li class="log__row">
+                  <span class="log__line"><span class="log__tag">[NET]</span><span class="log__text">Re-routing traffic to Global Node Alpha</span></span>
+                </li>
+              </ul>
+            </article>
+
+            <article class="card card--trajectory">
+              <h3 class="card__title">Predictive Trajectory</h3>
+              <div class="card__stats card__stats--trajectory">
+                <p class="stat"><span class="stat__label">Escaping Velocity</span><span class="stat__value stat__value--lg">99.98%</span></p>
+                <p class="stat"><span class="stat__label">Target ARR</span><span class="stat__value stat__value--lg">$50,000,000</span></p>
+                <p class="stat"><span class="stat__label">Confidence Score</span><span class="stat__value stat__value--lg">99.98%</span></p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Further sections are appended here; they stack in normal document flow. -->
 
 </main>
 

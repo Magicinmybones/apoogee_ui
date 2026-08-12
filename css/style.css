@@ -50,6 +50,18 @@
   font-display: swap;
 }
 
+/* Used only by the browser address bar inside the product window, which the
+   design sets in Inter. */
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-400-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                 U+02DC, U+2000-206F, U+2122, U+2212, U+FEFF, U+FFFD;
+}
+
 /* --------------------------------------------------------------------------
    Design tokens
    -------------------------------------------------------------------------- */
@@ -57,6 +69,11 @@
   /* Fluid units — 100vw / 1644 is exactly 1px at the reference width. */
   --u-ui: clamp(0.93px, calc(100vw / 1644), 1.15px);
   --u-hero: clamp(0.74px, calc(100vw / 1644), 1.3px);
+  /* The platform section is a single composed poster whose product window is
+     deliberately cropped by the foot of the frame. Fitting it to whichever of
+     width or height is tighter keeps that crop identical at every aspect
+     ratio, instead of swallowing the lower cards on 16:9 displays. */
+  --u-shot: clamp(0.62px, min(calc(100vw / 1644), calc(100svh / 1033)), 1.45px);
 
   /* Page gutters. 35px / 38px at the reference width, matching the design's
      header inset (the 3px difference is the design's own asymmetry). */
@@ -445,6 +462,608 @@ img {
 }
 
 /* ==========================================================================
+   Platform section
+   Reproduces the second design frame (also 1644 x 1033). Everything inside is
+   positioned in the design's own coordinates, scaled by --u-shot.
+   ========================================================================== */
+.platform {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--color-void);
+}
+
+.platform__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* Same photograph, framed on the point 36.7% down the image — the crop the
+   second frame uses. Sized like the hero's, see .hero__photo. */
+.platform__photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(108.699%, 172.95svh);
+  height: auto;
+  max-width: none;
+  transform: translate(-50%, -36.716%);
+  user-select: none;
+}
+
+.platform__content {
+  position: absolute;
+  left: 50%;
+  top: 20.813%; /* 215 / 1033 */
+  width: calc(901 * var(--u-shot));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The design seats the pill and the heading 8.25px left of the group's axis,
+   which the product window is centred on. */
+.pill,
+.platform__title {
+  transform: translateX(calc(-8.25 * var(--u-shot)));
+}
+
+/* "Live Data Stream" pill --------------------------------------------------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Width of the pill in the design, kept as a minimum so the substituted
+     typeface cannot narrow it. */
+  min-width: calc(138 * var(--u-shot));
+  gap: calc(10 * var(--u-shot));
+  margin: 0;
+  padding: calc(12 * var(--u-shot)) calc(16 * var(--u-shot));
+  border-radius: calc(6 * var(--u-shot));
+  background: rgba(10, 7, 7, 0.35);
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(12 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+.pill__dot {
+  width: calc(4 * var(--u-shot));
+  height: calc(4 * var(--u-shot));
+  border-radius: 50%;
+  background: var(--color-white);
+}
+
+.platform__title {
+  width: calc(469 * var(--u-shot));
+  margin: calc(39 * var(--u-shot)) 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(48 * var(--u-shot));
+  /* 0.95 x 48px, which the design renders as a 46px advance (138px / 3). */
+  line-height: 0.9583;
+  letter-spacing: -0.06em;
+  text-align: center;
+  color: var(--color-white);
+}
+
+/* ==========================================================================
+   Product window
+   ========================================================================== */
+.shot {
+  position: relative;
+  width: calc(901 * var(--u-shot));
+  height: calc(680 * var(--u-shot));
+  margin-top: calc(50 * var(--u-shot));
+  flex: none;
+}
+
+.shot__window {
+  position: absolute;
+  inset: 0;
+}
+
+/* The frosted window surface sits behind the toolbar and the cards. The design
+   stops it at 627px because the frame crops it long before that; it is carried
+   down to the full 680px here so the window still reads as complete on
+   displays tall enough to show its foot. */
+.shot__window::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(900 * var(--u-shot));
+  height: 100%;
+  border-radius: calc(7 * var(--u-shot));
+  background: rgba(17, 16, 15, 0.35);
+  -webkit-backdrop-filter: blur(calc(49.25 * var(--u-shot)));
+  backdrop-filter: blur(calc(49.25 * var(--u-shot)));
+}
+
+/* Browser chrome ---------------------------------------------------------- */
+.shot__toolbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(899.24 * var(--u-shot));
+  height: calc(37.23 * var(--u-shot));
+  border-radius: calc(7.025 * var(--u-shot)) calc(7.025 * var(--u-shot)) 0 0;
+  background: #191C1F;
+}
+
+.shot__lights {
+  position: absolute;
+  left: calc(14.75 * var(--u-shot));
+  top: calc(14.05 * var(--u-shot));
+  display: flex;
+  gap: calc(5.62 * var(--u-shot));
+}
+
+.shot__light {
+  width: calc(8.4304 * var(--u-shot));
+  height: calc(8.4304 * var(--u-shot));
+  border-radius: 50%;
+}
+
+.shot__light--close { background: #EE6A5F; }
+.shot__light--minimize { background: #F5BD4F; }
+.shot__light--fullscreen { background: #61C454; }
+
+/* Toolbar items are all 23.18 x 19.67 boxes; each glyph keeps the offset it
+   has inside that box in the design. */
+.shot__group {
+  position: absolute;
+  top: calc(8.43 * var(--u-shot));
+  display: flex;
+  height: calc(19.67 * var(--u-shot));
+}
+
+.shot__group--history {
+  left: calc(94.14 * var(--u-shot));
+  gap: 0;
+}
+
+.shot__group--tools {
+  left: calc(780.97 * var(--u-shot));
+  gap: calc(5.62 * var(--u-shot));
+}
+
+.shot__icon {
+  width: auto;
+  height: auto;
+}
+
+.shot__group .shot__icon {
+  width: calc(23.18 * var(--u-shot));
+  height: calc(19.67 * var(--u-shot));
+  object-fit: contain;
+  padding: calc(2.8 * var(--u-shot)) calc(5.5 * var(--u-shot));
+}
+
+.shot__icon--sidebar {
+  position: absolute;
+  left: calc(69.35 * var(--u-shot));  /* 64.63 + 4.72 */
+  top: calc(12.91 * var(--u-shot));   /* 8.43 + 4.48 */
+  width: calc(13.75 * var(--u-shot));
+  height: calc(10.74 * var(--u-shot));
+}
+
+.shot__address {
+  position: absolute;
+  left: calc(238.86 * var(--u-shot));
+  top: calc(8.43 * var(--u-shot));
+  width: calc(421.52 * var(--u-shot));
+  height: calc(19.67 * var(--u-shot));
+}
+
+.shot__icon--shield {
+  position: absolute;
+  left: calc(6.75 * var(--u-shot));
+  top: calc(4.11 * var(--u-shot));
+  width: calc(9.69 * var(--u-shot));
+  height: calc(11.78 * var(--u-shot));
+}
+
+.shot__url {
+  position: absolute;
+  left: calc(29.51 * var(--u-shot));
+  top: 0;
+  width: calc(362.99 * var(--u-shot));
+  height: calc(19.67 * var(--u-shot));
+  border-radius: calc(4.215 * var(--u-shot));
+  background: #0C0F12;
+}
+
+.shot__url-inner {
+  position: absolute;
+  left: calc(155.14 * var(--u-shot));
+  top: calc(4.5 * var(--u-shot));
+  display: flex;
+  align-items: center;
+  gap: calc(4.215 * var(--u-shot));
+  height: calc(11 * var(--u-shot));
+}
+
+.shot__lock {
+  width: calc(5.5 * var(--u-shot));
+  height: calc(8.03 * var(--u-shot));
+}
+
+.shot__host {
+  font-family: 'Inter', var(--font-ui);
+  font-weight: 400;
+  font-size: calc(9.1329 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.004em;
+  color: var(--color-white);
+}
+
+.shot__reload {
+  position: absolute;
+  left: calc(351.28 * var(--u-shot));
+  top: calc(5.62 * var(--u-shot));
+  width: calc(7.27 * var(--u-shot));
+  height: calc(8.86 * var(--u-shot));
+}
+
+/* Product navigation ------------------------------------------------------ */
+.dash-nav {
+  position: absolute;
+  left: 0;
+  top: calc(48 * var(--u-shot));
+  width: calc(901 * var(--u-shot));
+  height: calc(29 * var(--u-shot));
+  /* Full-width hairline with the brighter active run over its first 102px. */
+  background:
+    linear-gradient(to right, #FFFFFF calc(102 * var(--u-shot)), transparent calc(102 * var(--u-shot))) bottom left / 100% 1px no-repeat,
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)) bottom left / 100% 1px no-repeat;
+}
+
+.dash-nav__list {
+  position: absolute;
+  left: calc(22 * var(--u-shot));
+  top: calc(4 * var(--u-shot));
+  width: calc(357 * var(--u-shot));
+  height: calc(13 * var(--u-shot));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-nav__list li {
+  position: absolute;
+  top: 0;
+}
+
+.dash-nav__list li:nth-child(1) { left: 0; }
+.dash-nav__list li:nth-child(2) { left: calc(89 * var(--u-shot)); }
+.dash-nav__list li:nth-child(3) { left: calc(150 * var(--u-shot)); }
+.dash-nav__list li:nth-child(4) { left: calc(227 * var(--u-shot)); }
+.dash-nav__list li:nth-child(5) { left: calc(307 * var(--u-shot)); }
+
+.dash-nav__item {
+  display: flex;
+  align-items: center;
+  gap: calc(4 * var(--u-shot));
+  height: calc(13 * var(--u-shot));
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+  white-space: nowrap;
+  opacity: 0.5; /* icon and label are dimmed together in the design */
+}
+
+.dash-nav__item.is-active {
+  opacity: 1;
+}
+
+.dash-nav__item img {
+  width: calc(13 * var(--u-shot));
+  height: calc(13 * var(--u-shot));
+}
+
+.dash-nav__user {
+  position: absolute;
+  left: calc(820 * var(--u-shot));
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: calc(7 * var(--u-shot));
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+.dash-nav__avatar {
+  position: relative;
+  width: calc(18.69 * var(--u-shot));
+  height: calc(18.69 * var(--u-shot));
+  flex: none;
+}
+
+.dash-nav__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dash-nav__status {
+  position: absolute;
+  left: calc(15.57 * var(--u-shot));
+  top: calc(1.56 * var(--u-shot));
+  width: calc(3.43 * var(--u-shot));
+  height: calc(3.43 * var(--u-shot));
+  border-radius: 50%;
+  background: #A6FB89;
+}
+
+/* Dashboard --------------------------------------------------------------- */
+.dash {
+  position: absolute;
+  inset: 0;
+}
+
+.dash__tabs {
+  position: absolute;
+  left: calc(22 * var(--u-shot));
+  top: calc(110 * var(--u-shot));
+  width: calc(442 * var(--u-shot));
+  height: calc(40 * var(--u-shot));
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(40 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+/* Positioned at the design's own x offsets rather than by gap, so the tabs
+   land identically whatever the substituted font measures. */
+.dash__tab {
+  position: absolute;
+  top: 0;
+  opacity: 0.4;
+  white-space: nowrap;
+}
+
+.dash__tab.is-active { opacity: 1; }
+.dash__tab:nth-child(1) { left: 0; }
+.dash__tab:nth-child(2) { left: calc(142 * var(--u-shot)); }
+.dash__tab:nth-child(3) { left: calc(300 * var(--u-shot)); }
+
+/* Cards ------------------------------------------------------------------- */
+.card {
+  position: absolute;
+  border-radius: calc(23 * var(--u-shot));
+  background: rgba(17, 16, 15, 0.35);
+}
+
+.card--revenue { left: calc(20 * var(--u-shot)); top: calc(177 * var(--u-shot)); width: calc(282 * var(--u-shot)); height: calc(247 * var(--u-shot)); }
+.card--leads { left: calc(310 * var(--u-shot)); top: calc(177 * var(--u-shot)); width: calc(282 * var(--u-shot)); height: calc(247 * var(--u-shot)); }
+.card--sales { left: calc(600 * var(--u-shot)); top: calc(177 * var(--u-shot)); width: calc(282 * var(--u-shot)); height: calc(247 * var(--u-shot)); }
+.card--log { left: calc(21 * var(--u-shot)); top: calc(433 * var(--u-shot)); width: calc(426 * var(--u-shot)); height: calc(247 * var(--u-shot)); }
+.card--trajectory { left: calc(456 * var(--u-shot)); top: calc(433 * var(--u-shot)); width: calc(426 * var(--u-shot)); height: calc(247 * var(--u-shot)); }
+
+.card__title {
+  position: absolute;
+  left: calc(20 * var(--u-shot));
+  top: calc(21 * var(--u-shot));
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(14 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+.card__figure {
+  position: absolute;
+  left: calc(20 * var(--u-shot));
+  top: calc(55 * var(--u-shot));
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(32 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+.card__figure-minor {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.card__delta {
+  position: absolute;
+  left: calc(20 * var(--u-shot));
+  top: calc(98 * var(--u-shot));
+  display: flex;
+  align-items: center;
+  gap: calc(7 * var(--u-shot));
+  margin: 0;
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(5 * var(--u-shot)) calc(4 * var(--u-shot));
+  border-radius: calc(4 * var(--u-shot));
+  background: rgba(255, 255, 255, 0.2);
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+.card__delta-note {
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.56); /* 0.7 layer x 0.8 fill */
+}
+
+.card__chart {
+  position: absolute;
+}
+
+.card__chart--revenue { left: calc(19 * var(--u-shot)); top: calc(148 * var(--u-shot)); width: calc(245.5 * var(--u-shot)); height: calc(69.5 * var(--u-shot)); }
+.card__chart--leads { left: calc(21 * var(--u-shot)); top: calc(120 * var(--u-shot)); width: calc(238 * var(--u-shot)); height: calc(109 * var(--u-shot)); }
+.card__chart--sales { left: calc(17 * var(--u-shot)); top: calc(110 * var(--u-shot)); width: calc(246 * var(--u-shot)); height: calc(120 * var(--u-shot)); }
+
+.card__axis {
+  position: absolute;
+  left: calc(19 * var(--u-shot));
+  top: calc(223 * var(--u-shot)); /* 148 + 75 */
+  width: calc(244 * var(--u-shot));
+  height: calc(7 * var(--u-shot));
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(7 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.card__axis span {
+  position: absolute;
+  top: 0;
+}
+
+.card__axis span:nth-child(1) { left: calc(3 * var(--u-shot)); }
+.card__axis span:nth-child(2) { left: calc(59 * var(--u-shot)); }
+.card__axis span:nth-child(3) { left: calc(114 * var(--u-shot)); }
+.card__axis span:nth-child(4) { left: calc(169 * var(--u-shot)); }
+.card__axis span:nth-child(5) { left: calc(223 * var(--u-shot)); }
+
+/* Paired label / value blocks --------------------------------------------- */
+.card__stats {
+  position: absolute;
+  left: calc(19 * var(--u-shot));
+  top: calc(55 * var(--u-shot));
+  right: 0;
+}
+
+.card--sales .card__stats { left: calc(20 * var(--u-shot)); }
+
+.card__stats--trajectory { top: calc(57 * var(--u-shot)); left: calc(20 * var(--u-shot)); }
+
+.stat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u-shot));
+  margin: 0;
+  white-space: nowrap;
+}
+
+.card--leads .stat--wide { left: calc(128 * var(--u-shot)); }  /* 147 - 19 */
+.card--sales .stat--wide { left: calc(120 * var(--u-shot)); }  /* 140 - 20 */
+
+.card__stats--trajectory .stat:nth-child(2) { left: calc(141 * var(--u-shot)); } /* 161 - 20 */
+.card__stats--trajectory .stat:nth-child(3) { left: calc(275 * var(--u-shot)); } /* 295 - 20 */
+.card__stats--trajectory .stat { gap: calc(6 * var(--u-shot)); }
+
+.stat__label {
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.4); /* 0.5 layer x 0.8 fill */
+}
+
+.stat__value {
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(14 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+.stat__value--sm { font-size: calc(10 * var(--u-shot)); }
+.stat__value--lg { font-size: calc(14 * var(--u-shot)); }
+
+/* Inference log ----------------------------------------------------------- */
+.log {
+  position: absolute;
+  left: calc(20 * var(--u-shot));
+  top: calc(54 * var(--u-shot));
+  width: calc(391 * var(--u-shot));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(7 * var(--u-shot));
+}
+
+.log__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: calc(20 * var(--u-shot));
+}
+
+.log__line {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u-shot));
+}
+
+.log__tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(5 * var(--u-shot)) calc(4 * var(--u-shot));
+  background: rgba(255, 255, 255, 0.07);
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.4); /* 0.5 layer x 0.8 fill */
+}
+
+.log__text,
+.log__state {
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: calc(10 * var(--u-shot));
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
    Reflow for narrow viewports
    Placeholder behaviour so the page stays usable below the desktop range;
    the tablet and phone layouts are still to be designed.
@@ -452,6 +1071,10 @@ img {
 @media (max-width: 900px) {
   :root {
     --u-ui: 1px;
+    /* Fit the product window to the viewport width rather than clipping it.
+       A proper narrow-viewport treatment for this section is still to be
+       designed. */
+    --u-shot: calc((100vw - 40px) / 901);
   }
 
   .site-header {
