@@ -128,9 +128,14 @@
       HERO_EXIT.fadePow).toFixed(3));
     /* `none` rather than blur(0) so nothing is rasterised through a filter
        while the hero is at rest. */
-    root.style.setProperty('--hero-filter', exit > 0
-      ? 'blur(calc(' + blur.toFixed(3) + ' * var(--u-hero)))'
-      : 'none');
+    if (exit > 0) {
+      root.style.setProperty('--hero-filter',
+        'blur(calc(' + blur.toFixed(3) + ' * var(--u-hero)))');
+      root.style.setProperty('--badge-backdrop', 'none');
+    } else {
+      root.style.setProperty('--hero-filter', 'none');
+      root.style.removeProperty('--badge-backdrop');
+    }
     root.style.setProperty('--hero-vis', exit >= 1 ? 'hidden' : 'visible');
 
     root.style.setProperty('--plat-o',
@@ -146,6 +151,10 @@
 
     /* Layer promotion is worth it mid-move and costs sharpness at rest. */
     root.classList.toggle('is-moving', p > 0.001 && p < 0.999);
+
+    /* Once the reader is moving, the opening has had its chance; retire it so
+       it cannot outrank the exit. */
+    if (p > 0.05) openHero();
   }
 
   /* ------------------------------------------------------------------
@@ -224,13 +233,34 @@
 
   /* ------------------------------------------------------------------
      Opening. Skipped when the page loads part-scrolled, or on request.
+
+     When it has played, .is-open retires its machinery. That matters beyond
+     tidiness: a filled animation outranks the element's own opacity, so the
+     exit could not fade a block the opening had left behind, and the line
+     clip would cut the exit's blur off at the baseline.
      ------------------------------------------------------------------ */
+  var intro = null;
+  var opened = false;
+
+  function openHero() {
+    if (opened) return;
+    opened = true;
+    if (intro) { clearTimeout(intro); intro = null; }
+    root.classList.add('is-open');
+  }
+
   function startIntro() {
     if (reduced || progress() > 0.02) {
       root.classList.add('is-instant');
+      openHero();
       return;
     }
     root.classList.add('is-ready');
+    /* The sub-copy's fade is the last of the opening to finish. The timer is
+       the backstop for when that event does not arrive. */
+    var last = document.querySelector('.hero__subtitle');
+    if (last) last.addEventListener('animationend', openHero, { once: true });
+    intro = setTimeout(openHero, 1800);
   }
 
   if (document.fonts && document.fonts.ready) {

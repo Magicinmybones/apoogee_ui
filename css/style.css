@@ -419,14 +419,28 @@ img {
   width: calc(763 * var(--u-hero));
   max-width: 100%;
   /* The exit is a lift out of focus, not a fade in place: the block
-     accelerates upward about 56px, its focus opens to ~14px of blur, and
+     accelerates upward about 163px, its focus opens to ~18px of blur, and
      only then does it thin out. Each of the three is driven separately by
-     js/script.js; --hero-filter resolves to `none` at rest so the settled
-     hero is composited without a filter and stays pixel-exact. */
+     js/script.js. The lift is carried here, on the wrapper, so the three
+     blocks hold their spacing; the blur and the fade are carried by each
+     block itself — see below. */
   transform: translateY(calc(var(--hero-out, 0) * -163 * var(--u-hero)));
+  visibility: var(--hero-vis, visible);
+}
+
+/* The blur and the fade sit on the three blocks rather than on the wrapper.
+   Through an ancestor filter, engines vary on whether a descendant carrying
+   its own compositing feature — the badge's backdrop-filter, the headline
+   lines' clip — is drawn through that filter or beside it, and where they
+   disagree those two blocks leave sharp while the plain sub-copy dissolves.
+   Applied per block there is no ancestor involved and nothing to disagree
+   about. --hero-filter resolves to `none` at rest, so the settled hero is
+   composited without a filter at all and stays pixel-exact. */
+.hero__badge,
+.hero__title,
+.hero__subtitle {
   opacity: var(--hero-o, 1);
   filter: var(--hero-filter, none);
-  visibility: var(--hero-vis, visible);
 }
 
 /* "Backed by: Y Combinator" pill ------------------------------------------ */
@@ -437,8 +451,12 @@ img {
   padding: calc(9.86 * var(--u-ui)) calc(14.0305 * var(--u-ui));
   border-radius: calc(5 * var(--u-ui));
   background: var(--color-badge-surface);
-  -webkit-backdrop-filter: blur(calc(14.6 * var(--u-ui)));
-  backdrop-filter: blur(calc(14.6 * var(--u-ui)));
+  /* Dropped for the duration of the exit by js/script.js: an element that is
+     both blurring and sampling its own backdrop is the one case engines
+     handle least consistently, and by then there is nothing behind it worth
+     frosting anyway. */
+  -webkit-backdrop-filter: var(--badge-backdrop, blur(calc(14.6 * var(--u-ui))));
+  backdrop-filter: var(--badge-backdrop, blur(calc(14.6 * var(--u-ui))));
 }
 
 .hero__badge-row {
@@ -1104,13 +1122,15 @@ img {
   display: block;
 }
 
-.js .site-header,
-.js .hero__badge,
-.js .hero__subtitle {
+/* Hidden only until the opening has run; :not(.is-open) so that afterwards
+   each block is back on its own rules and the exit can drive them. */
+.js:not(.is-open) .site-header,
+.js:not(.is-open) .hero__badge,
+.js:not(.is-open) .hero__subtitle {
   opacity: 0;
 }
 
-.js .hero__title .line__in {
+.js:not(.is-open) .hero__title .line__in {
   transform: translateY(100%);
   opacity: 0;
 }
@@ -1132,6 +1152,22 @@ img {
 .is-ready .hero__badge,
 .is-ready .hero__subtitle {
   animation: fade-in 0.35s linear 0.95s forwards;
+}
+
+/* Once the opening has played there is nothing left for its machinery to do,
+   and every piece of it — the filled animations, the line clip — would
+   otherwise still be in the way of the exit: a filled animation outranks the
+   element's own opacity, and the clip would cut the blur off at the baseline.
+   js/script.js adds .is-open when the last of them finishes. */
+.is-open .hero__title .line {
+  clip-path: none;
+}
+
+.is-open .site-header,
+.is-open .hero__badge,
+.is-open .hero__subtitle,
+.is-open .hero__title .line__in {
+  animation: none;
 }
 
 /* Loading with the page already scrolled, or with reduced motion, skips it. */
