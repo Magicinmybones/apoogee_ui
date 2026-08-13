@@ -63,8 +63,10 @@
      animation's 2.05s -> 5.10s transition and normalised onto it. */
   var T = {
     /* The hero copy holds at full strength while the camera climbs, then goes
-       in about a fifth of a second — much faster than the move around it. */
-    heroOut:   [0.295, 0.365, easeInOutCubic],
+       in about a third of a second — much faster than the move around it.
+       Shaped by HERO_EXIT rather than a single ease: the three properties
+       that carry it do not run on the same curve. */
+    heroOut:   [0.297, 0.403],
     /* The reference keeps the warm wash the whole way; it is resolved late so
        the frame still lands on its design, which has no wash. */
     glowOut:   [0.550, 0.950, easeInOutCubic],
@@ -75,6 +77,29 @@
        The two rates are the parallax the arrival gets its depth from. */
     platText:  [0.563, 0.967, easeOutQuart],
     platShot:  [0.557, 0.984, easeOutCubic]
+  };
+
+  /* ------------------------------------------------------------------
+     The hero exit
+
+     Tracked at full resolution in the reference, the headline neither
+     simply fades nor simply slides. Correlating each line against its own
+     sharp frame gives, over the 0.33s the exit lasts:
+
+       rise    0 -> 56px, accelerating (it fits t^1.8, not an ease-out)
+       blur    0 -> 14px of Gaussian, on a slightly gentler t^1.6
+       opacity holds at 1 for the first 40% of the window, then falls
+               close to linearly to 0
+
+     So the copy is pulled up and out of focus first and only disappears
+     once it is already soft, which is why a plain fade reads as wrong.
+     Distances are design pixels and scale with --u-hero.
+     ------------------------------------------------------------------ */
+  var HERO_EXIT = {
+    risePow:  1.8,
+    blur:     14,
+    blurPow:  1.6,
+    fadeFrom: 0.40
   };
 
   var scene = document.getElementById('scene');
@@ -92,10 +117,17 @@
 
     root.style.setProperty('--glow-o', (1 - track(p, T.glowOut[0], T.glowOut[1], T.glowOut[2])).toFixed(3));
 
-    var heroOut = track(p, T.heroOut[0], T.heroOut[1], T.heroOut[2]);
-    root.style.setProperty('--hero-out', heroOut.toFixed(3));
-    root.style.setProperty('--hero-o', (1 - heroOut).toFixed(3));
-    root.style.setProperty('--hero-vis', heroOut >= 1 ? 'hidden' : 'visible');
+    var exit = track(p, T.heroOut[0], T.heroOut[1]);
+    var blur = HERO_EXIT.blur * Math.pow(exit, HERO_EXIT.blurPow);
+    root.style.setProperty('--hero-out', Math.pow(exit, HERO_EXIT.risePow).toFixed(4));
+    root.style.setProperty('--hero-o',
+      (1 - clamp01((exit - HERO_EXIT.fadeFrom) / (1 - HERO_EXIT.fadeFrom))).toFixed(3));
+    /* `none` rather than blur(0) so nothing is rasterised through a filter
+       while the hero is at rest. */
+    root.style.setProperty('--hero-filter', exit > 0
+      ? 'blur(calc(' + blur.toFixed(3) + ' * var(--u-hero)))'
+      : 'none');
+    root.style.setProperty('--hero-vis', exit >= 1 ? 'hidden' : 'visible');
 
     root.style.setProperty('--plat-o',
       track(p, T.platIn[0], T.platIn[1], T.platIn[2]).toFixed(3));

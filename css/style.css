@@ -418,10 +418,14 @@ img {
   gap: calc(30 * var(--u-hero));
   width: calc(763 * var(--u-hero));
   max-width: 100%;
-  /* On the way out it fades and drifts up about 10px — measured off the
-     reference, where the block's bounding box climbs 8-10px as it goes. */
-  transform: translateY(calc(var(--hero-out, 0) * -10 * var(--u-hero)));
+  /* The exit is a lift out of focus, not a fade in place: the block
+     accelerates upward about 56px, its focus opens to ~14px of blur, and
+     only then does it thin out. Each of the three is driven separately by
+     js/script.js; --hero-filter resolves to `none` at rest so the settled
+     hero is composited without a filter and stays pixel-exact. */
+  transform: translateY(calc(var(--hero-out, 0) * -56 * var(--u-hero)));
   opacity: var(--hero-o, 1);
+  filter: var(--hero-filter, none);
   visibility: var(--hero-vis, visible);
 }
 
