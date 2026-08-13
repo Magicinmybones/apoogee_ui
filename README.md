@@ -232,10 +232,10 @@ centred navigation pill and right-side actions no longer retain a comfortable
 gap. Below that content-derived breakpoint, the header uses its toggle menu and
 the scene adopts a tablet architecture. Portrait/square tablets keep the
 signal, statement and product in narrative order with the dashboard scaled by
-both available width and height; landscape tablets place the statement beside
-the complete dashboard so every card remains visible without shrinking the UI
-to an unreadable size. The same HTML, assets and animation tracks serve both
-architectures.
+both available width and height. The statement remains above the complete
+dashboard at every tablet aspect ratio, with the product scaled to keep every
+card visible without shrinking the UI more than the available height requires.
+The same HTML, assets and animation tracks serve the responsive architecture.
 
 ## Verification
 

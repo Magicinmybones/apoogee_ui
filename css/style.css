@@ -1198,10 +1198,9 @@ img {
    comfortable gap. Until then the original desktop composition remains
    untouched. Below that point the same content is re-composed for tablet.
 
-   Portrait tablets keep the narrative order (signal, statement, product),
-   while landscape tablets use the otherwise wasted side space for a compact
-   editorial/product split. The product UI remains one proportional unit in
-   both arrangements, so none of its cards or chrome is redesigned.
+   Every tablet shape keeps the narrative order (signal, statement, product).
+   The product UI remains one proportional unit, so none of its cards or
+   chrome is redesigned.
    ========================================================================== */
 @media (max-width: 900px) {
   :root {
@@ -1302,7 +1301,7 @@ img {
     font-size: clamp(15px, 4.2vw, 20px);
   }
 
-  /* Portrait / square tablet: retain reading order, but fit the complete
+  /* Retain reading order at every tablet aspect ratio, but fit the complete
      product composition rather than letting its lower cards fall below the
      viewport as the former width-only placeholder did. */
   .platform__content {
@@ -1338,50 +1337,6 @@ img {
 
   .shot {
     margin-top: clamp(28px, 4svh, 42px);
-  }
-}
-
-/* Landscape tablets have sufficient inline space to keep the full dashboard
-   meaningful at a larger scale. The text becomes an editorial rail beside it
-   instead of being compressed above it. This is shape-driven, not a second
-   device-specific breakpoint. */
-@media (max-width: 900px) and (min-width: 700px) and (min-aspect-ratio: 1 / 1) {
-  :root {
-    --u-shot: calc(
-      min(60vw, calc((100svh - 150px) * 1.325)) / 901
-    );
-  }
-
-  .platform__content {
-    top: 50%;
-    width: calc(100% - 2 * var(--tablet-gutter));
-    height: calc(680 * var(--u-shot));
-    display: grid;
-    grid-template-columns: minmax(190px, 1fr) auto;
-    grid-template-rows: 1fr auto clamp(22px, 3.5svh, 34px) auto 1fr;
-    column-gap: clamp(24px, 4vw, 44px);
-    align-items: center;
-    transform: translate(-50%, -50%);
-  }
-
-  .pill {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: center;
-  }
-
-  .platform__title {
-    grid-column: 1;
-    grid-row: 4;
-    width: min(100%, 280px);
-    margin: 0;
-    font-size: clamp(29px, 4.25vw, 38px);
-  }
-
-  .shot {
-    grid-column: 2;
-    grid-row: 1 / -1;
-    margin: 0;
   }
 }
 
