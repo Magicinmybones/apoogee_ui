@@ -1191,17 +1191,32 @@ img {
 }
 
 /* ==========================================================================
-   Reflow for narrow viewports
-   Placeholder behaviour so the page stays usable below the desktop range;
-   the tablet and phone layouts are still to be designed.
+   Tablet architecture
+
+   The desktop header reaches its first real compression point at 900px: the
+   centred 343px navigation pill and the 226px action group no longer have a
+   comfortable gap. Until then the original desktop composition remains
+   untouched. Below that point the same content is re-composed for tablet.
+
+   Portrait tablets keep the narrative order (signal, statement, product),
+   while landscape tablets use the otherwise wasted side space for a compact
+   editorial/product split. The product UI remains one proportional unit in
+   both arrangements, so none of its cards or chrome is redesigned.
    ========================================================================== */
 @media (max-width: 900px) {
   :root {
     --u-ui: 1px;
-    /* Fit the product window to the viewport width rather than clipping it.
-       A proper narrow-viewport treatment for this section is still to be
-       designed. */
-    --u-shot: calc((100vw - 40px) / 901);
+    --tablet-gutter: clamp(24px, 4vw, 36px);
+    --gutter-start: var(--tablet-gutter);
+    --gutter-end: var(--tablet-gutter);
+    /* Preserve enough vertical room for the heading above the product while
+       allowing the dashboard to use the full safe width when height permits. */
+    --u-shot: calc(
+      min(
+        calc(100vw - 2 * var(--tablet-gutter)),
+        calc((100svh - 330px) * 1.325)
+      ) / 901
+    );
   }
 
   .site-header {
@@ -1221,12 +1236,17 @@ img {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin: 10px var(--gutter-end) 0 var(--gutter-start);
+    width: min(360px, calc(100% - 2 * var(--tablet-gutter)));
+    margin: 10px var(--gutter-end) 0 auto;
     padding: 14px;
     border-radius: 13px;
-    background: var(--color-actions-surface);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(8, 10, 25, 0.78);
     -webkit-backdrop-filter: blur(14.6px);
     backdrop-filter: blur(14.6px);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    transform-origin: top right;
+    animation: tablet-menu-in 0.2s ease-out both;
   }
 
   .mobile-menu[hidden] {
@@ -1234,10 +1254,21 @@ img {
   }
 
   .mobile-menu__link {
-    padding: 10px;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 9px;
     font-size: 16px;
     letter-spacing: -0.02em;
     color: var(--color-text-muted);
+    transition: color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .mobile-menu__link:hover,
+  .mobile-menu__link:focus-visible {
+    color: var(--color-white);
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .mobile-menu__actions {
@@ -1250,30 +1281,119 @@ img {
     flex: 1;
   }
 
-  .hero {
-    justify-content: center;
-    padding-top: calc(92px + 6vh);
-    padding-bottom: 8vh;
+  .scene__viewport {
+    padding-inline: var(--tablet-gutter);
+    padding-bottom: clamp(32px, 6.5svh, 64px);
   }
 
   .hero__content {
     width: 100%;
-    gap: 24px;
+    gap: clamp(20px, 3svh, 26px);
   }
 
   .hero__title {
     font-size: clamp(38px, 10.2vw, 68px);
-    transform: none;
-  }
-
-  .hero__title br {
-    display: none;
+    transform: translateX(-0.03em);
   }
 
   .hero__subtitle {
     width: 100%;
     max-width: 423px;
     font-size: clamp(15px, 4.2vw, 20px);
+  }
+
+  /* Portrait / square tablet: retain reading order, but fit the complete
+     product composition rather than letting its lower cards fall below the
+     viewport as the former width-only placeholder did. */
+  .platform__content {
+    top: clamp(88px, 11svh, 132px);
+    width: calc(100% - 2 * var(--tablet-gutter));
+  }
+
+  .pill,
+  .platform__title {
+    transform:
+      translateX(0)
+      translateY(calc((1 - var(--plat-text-p, 1)) * 638 * var(--u-shot)));
+  }
+
+  .pill {
+    min-width: 138px;
+    gap: 10px;
+    padding: 11px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .pill__dot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .platform__title {
+    width: min(500px, 100%);
+    margin-top: clamp(22px, 3svh, 30px);
+    font-size: clamp(31px, 5.2vw, 42px);
+  }
+
+  .shot {
+    margin-top: clamp(28px, 4svh, 42px);
+  }
+}
+
+/* Landscape tablets have sufficient inline space to keep the full dashboard
+   meaningful at a larger scale. The text becomes an editorial rail beside it
+   instead of being compressed above it. This is shape-driven, not a second
+   device-specific breakpoint. */
+@media (max-width: 900px) and (min-width: 700px) and (min-aspect-ratio: 1 / 1) {
+  :root {
+    --u-shot: calc(
+      min(60vw, calc((100svh - 150px) * 1.325)) / 901
+    );
+  }
+
+  .platform__content {
+    top: 50%;
+    width: calc(100% - 2 * var(--tablet-gutter));
+    height: calc(680 * var(--u-shot));
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) auto;
+    grid-template-rows: 1fr auto clamp(22px, 3.5svh, 34px) auto 1fr;
+    column-gap: clamp(24px, 4vw, 44px);
+    align-items: center;
+    transform: translate(-50%, -50%);
+  }
+
+  .pill {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+  }
+
+  .platform__title {
+    grid-column: 1;
+    grid-row: 4;
+    width: min(100%, 280px);
+    margin: 0;
+    font-size: clamp(29px, 4.25vw, 38px);
+  }
+
+  .shot {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    margin: 0;
+  }
+}
+
+@keyframes tablet-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

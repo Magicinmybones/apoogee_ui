@@ -277,9 +277,17 @@
   var menu = document.getElementById('mobile-menu');
   if (!toggle || !menu) return;
 
-  function setMenu(open) {
+  function setMenu(open, returnFocus) {
     toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
     menu.hidden = !open;
+
+    if (open) {
+      var firstLink = menu.querySelector('a');
+      if (firstLink) firstLink.focus({ preventScroll: true });
+    } else if (returnFocus) {
+      toggle.focus({ preventScroll: true });
+    }
   }
 
   toggle.addEventListener('click', function () {
@@ -291,7 +299,19 @@
   });
 
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') setMenu(false);
+    if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setMenu(false, true);
+    }
+  });
+
+  document.addEventListener('click', function (event) {
+    if (
+      toggle.getAttribute('aria-expanded') === 'true' &&
+      !toggle.contains(event.target) &&
+      !menu.contains(event.target)
+    ) {
+      setMenu(false);
+    }
   });
 
   window.addEventListener('resize', function () {

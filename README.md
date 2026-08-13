@@ -227,8 +227,15 @@ full-bleed because it is now a page section rather than a shot; setting
 `--hero-inset: 12px` and `--hero-radius: 42px` in `:root` restores the inset,
 rounded card.
 
-Tablet and phone layouts are not designed yet — below 900px the page falls back
-to a single-column reflow with a toggle menu so it stays usable.
+At 900px the desktop header reaches its first genuine compression point: the
+centred navigation pill and right-side actions no longer retain a comfortable
+gap. Below that content-derived breakpoint, the header uses its toggle menu and
+the scene adopts a tablet architecture. Portrait/square tablets keep the
+signal, statement and product in narrative order with the dashboard scaled by
+both available width and height; landscape tablets place the statement beside
+the complete dashboard so every card remains visible without shrinking the UI
+to an unreadable size. The same HTML, assets and animation tracks serve both
+architectures.
 
 ## Verification
 
