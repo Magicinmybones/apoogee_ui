@@ -423,7 +423,7 @@ img {
      only then does it thin out. Each of the three is driven separately by
      js/script.js; --hero-filter resolves to `none` at rest so the settled
      hero is composited without a filter and stays pixel-exact. */
-  transform: translateY(calc(var(--hero-out, 0) * -56 * var(--u-hero)));
+  transform: translateY(calc(var(--hero-out, 0) * -163 * var(--u-hero)));
   opacity: var(--hero-o, 1);
   filter: var(--hero-filter, none);
   visibility: var(--hero-vis, visible);
