@@ -151,16 +151,26 @@
   /* ------------------------------------------------------------------
      Scroll binding
 
-     Scroll gives the *target*; what gets rendered eases toward it. Mapping
-     the timeline straight onto scrollY looks correct in a slow drag but
-     collapses on a flick — a single wheel gesture can jump the whole scene in
-     one frame, which reads as no animation at all. Damping means a flick still
-     plays the move out, while a deliberate scroll stays in step.
+     Scroll gives the *target*; what gets rendered follows it. Mapping the
+     timeline straight onto scrollY looks correct in a slow drag but collapses
+     on a flick — a single wheel gesture can jump the whole scene in one frame,
+     which reads as no animation at all.
 
-     The step is frame-rate independent: an exponential approach to the target
-     over real elapsed time, so it behaves the same at 60Hz and 120Hz.
+     An exponential approach on its own is not enough either. It closes most of
+     the gap immediately, so on a flick the first half of the timeline — which
+     is where the hero copy leaves — is over in a tenth of a second and simply
+     is not seen. What holds that beat open is a ceiling on how fast the
+     timeline may advance: past it the scene plays at its own rate no matter
+     how hard the page was thrown. MAX_RATE is set so a flick plays the whole
+     move out in about two and a half seconds, near the reference's own 3.05s,
+     which leaves the exit the half second it needs to read.
+
+     Below the ceiling the smoothing is light, so a deliberate scroll still
+     tracks the hand. Both steps are frame-rate independent — they work off
+     real elapsed time, so they behave the same at 60Hz and 120Hz.
      ------------------------------------------------------------------ */
-  var SETTLE = 5.5;      /* approach rate, per second */
+  var SETTLE = 9;        /* approach rate, per second */
+  var MAX_RATE = 0.40;   /* ceiling on timeline units per second */
   var EPSILON = 0.0004;  /* close enough to snap, so the ends stay exact */
 
   var current = 0;
@@ -182,7 +192,11 @@
     if (reduced) {
       current = target;
     } else {
-      current += (target - current) * (1 - Math.exp(-SETTLE * dt));
+      var step = (target - current) * (1 - Math.exp(-SETTLE * dt));
+      var cap = MAX_RATE * dt;
+      if (step > cap) step = cap;
+      else if (step < -cap) step = -cap;
+      current += step;
       if (Math.abs(target - current) < EPSILON) current = target;
     }
 
